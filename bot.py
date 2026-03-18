@@ -1,4 +1,5 @@
 import logging
+import os
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 
@@ -10,151 +11,154 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ==============================
+# ТОКЕН БОТА (вставьте свой)
+# ==============================
+BOT_TOKEN = "8527254808:AAFwxXa42esSXIfLE1snOdEUGExVB4Cuasc"
+
+# ==============================
 # КАТЕГОРИИ И МОДЕЛИ
 # ==============================
 
-# Словарь с категориями и моделями
-# Формат: "Категория": {"Название модели": "ссылка"}
+# Структура категорий с соответствием папкам
 CATEGORIES = {
     "🤖 Роботы-пылесосы": {
-        "F9 Pro": "https://drive.google.com/file/d/13wR8298IxvStbAgVth3qDSNjZXAdJ1oo/view?usp=sharing",
-        "Серия F10": "https://drive.google.com/file/d/1sy6nVkmlPsFiBfTqgA-aUIv2fFlWlMe-/view?usp=sharing",
-        "F20": "https://drive.google.com/file/d/16iClR2rCSxol9e7Y0MaS_wZA-smvqguI/view?usp=drive_link",
-        "F21": "https://drive.google.com/file/d/1r6rgzsu7JUPmkEL0G2O0ZJf1Nbfi_Z6L/view?usp=drive_link",
-        "F21 Plus": "https://drive.google.com/file/d/1DzbMNFHMA6UMFvvuYZjMj3i6bcKzcF1_/view?usp=drive_link",
-        "D9 Max": "https://drive.google.com/file/d/1wBjsxSqBmUPBjTmX746QBpt5-DuR_3RW/view?usp=sharing",
-        "D9 Max Gen 2": "https://drive.google.com/file/d/1gTLwFyc3xi0ML-u2jeneAG4P-kfq8L21/view?usp=sharing",
-        "D9 Plus": "https://drive.google.com/file/d/12qiVcKDveHIU_f8Tla4c2yM6AM0nOmrO/view?usp=sharing",
-        "D10 Plus": "https://drive.google.com/file/d/1Rt4YEIy9arwYRJTLmqJxQg1poEGOY7dn/view?usp=sharing",
-        "D10 Plus Gen 2": "https://drive.google.com/file/d/1votHcznDR7swe5zsFMudfFTLwAYxS3-h/view?usp=sharing",
-        "D10s": "https://drive.google.com/file/d/116E7XKRvzPOzTL0_XbbhzxdpIl764X8m/view?usp=sharing",
-        "D10s Pro & D10s Plus": "https://drive.google.com/file/d/1KqHR4iqWNS9xGUHQQwIC6c2yME03I1xK/view?usp=sharing",
-        "Серия D20": "https://drive.google.com/file/d/1xoLmc19FdZ1KO6QwmSQOurjlq9m627Z1/view?usp=sharing",
-        "D30 Ultra": "https://drive.google.com/file/d/1h09RyyVI3U_eSUv4rLhf8AYF1CHutqIB/view?usp=sharing",
-        "L10s Pro": "https://drive.google.com/file/d/1lS4GvYu2N9grGjpkIuD7OdGN8ighc7mT/view?usp=sharing",
-        "L10s Plus & L10s Pro Gen 2": "https://drive.google.com/file/d/14mVqy3pRrSCXRmk3FAm_FhX4BRS8pJQ6/view?usp=sharing",
-        "L10 Ultra & L10 Prime": "https://drive.google.com/file/d/1oJsTXZWjRif2nkwlKd4lhlJfJd277-I1/view?usp=sharing",
-        "L10s Ultra": "https://drive.google.com/file/d/1NYmzDMmTlKwu1zfpKjx4Hj3RCe-V5GTW/view?usp=sharing",
-        "L10s Pro Ultra": "https://drive.google.com/file/d/1REboK4uDTxr-6OkQkkLEhLxhMf6vJiBs/view?usp=sharing",
-        "L20 Ultra Complete": "https://drive.google.com/file/d/1zOy89Qk9_8Z7znmPZnsB-Mzu6tZCOC2h/view?usp=sharing",
-        "L30 Ultra": "https://drive.google.com/file/d/1iE5qjzi_hG3B78gckgKnwHIUmnthCcwG/view?usp=sharing",
-        "L40": "https://drive.google.com/file/d/1utwXSMpuqN8tayfsSVq4SBQdBPeslYLw/view?usp=sharing",
-        "L40 Ultra CE & L40s Ultra": "https://drive.google.com/file/d/1Zl0vstqYpY352WXco99xM-IfLulrlYjE/view?usp=sharing",
-        "L40 Ultra AE": "https://drive.google.com/file/d/1PjfGgxi3s-ORL6Hjp6EegOJFlwHZWntD/view?usp=sharing",
-        "L40s Pro Ultra": "https://drive.google.com/file/d/1VDzSg2dt-QKLLrHt7Tyh21c-p9BqUvU0/view?usp=sharing",
-        "X40 Ultra Complete": "https://drive.google.com/file/d/1ZnzT0SfkNYqOfIcUIry3hbHrKWaiOMLn/view?usp=sharing",
-        "Серия X50": "https://drive.google.com/file/d/1DXNdbdL-S9hpqVzLh5nKhnWEBqQwMIiX/view?usp=sharing",
-        "Matrix10 Ultra": "https://drive.google.com/file/d/1v9Mq4HcEMHPWjde8Hs5RmVf1tB1QysxG/view?usp=sharing",
-        "Aqua10 Ultra Roller Complete": "https://drive.google.com/file/d/1MQH2gjmZbcNh3tPGRXx-AXJOW5D76BVh/view?usp=sharing",
-        # ДОБАВЛЯЙ НОВЫЕ МОДЕЛИ СЮДА
-        # "Новая модель": "https://drive.google.com/...",
+        "folder": "robots",
+        "models": [
+            "F9 Pro",
+            "Серия F10",
+            "F20",
+            "F21",
+            "F21 Plus",
+            "D9 Max",
+            "D9 Max Gen 2",
+            "D9 Plus",
+            "D10 Plus",
+            "D10 Plus Gen 2",
+            "D10s",
+            "D10s Pro & D10s Plus",
+            "Серия D20",
+            "D30 Ultra",
+            "L10s Pro",
+            "L10s Plus & L10s Pro Gen 2",
+            "L10 Ultra & L10 Prime",
+            "L10s Ultra",
+            "L10s Pro Ultra",
+            "L20 Ultra Complete",
+            "L30 Ultra",
+            "L40",
+            "L40 Ultra CE & L40s Ultra",
+            "L40 Ultra AE",
+            "L40s Pro Ultra",
+            "X40 Ultra Complete",
+            "Серия X50",
+            "Matrix10 Ultra",
+            "Aqua10 Ultra Roller Complete"
+        ]
     },
     
     "🔋 Вертикальные пылесосы": {
-        "U10 & U20": "https://drive.google.com/file/d/1FU47npYBwANB3We5TxodDRxMCi_PfB-2/view?usp=sharing",
-        "R10 & R10 Pro": "https://drive.google.com/file/d/1Y0Cc2PHNcDv-qzA1dZmWE5f1h6c65Ibh/view?usp=sharing",
-        "R10 Pro Aqua": "https://drive.google.com/file/d/1sMrU6wg8wewy8UmFWWQum0N3ujl9WqlZ/view?usp=sharing",
-        "R10s Essential": "https://drive.google.com/file/d/18iNmkZYaFkAgtIOXo17omRGLNPZa87y9/view?usp=sharing",
-        "R10s & R10s Pro": "https://drive.google.com/file/d/1X7T3BmiTP_L8LfcADoT7l7dYy7fV-xzz/view?usp=sharing",
-        "R10s Aqua": "https://drive.google.com/file/d/189t5xtKhEQVGC-BFOp6rUokouZAtucf7/view?usp=sharing",
-        "R20 Essential": "https://drive.google.com/file/d/1bE5C5noY_0QeT_u2z2xbcQ-ytXhyICHH/view?usp=sharing",
-        "R20": "https://drive.google.com/file/d/1vcD0W8v8ZcW6eyuETZn0xPFtTRI5f_IP/view?usp=sharing",
-        "R20 Aqua": "https://drive.google.com/file/d/17Bb3ntnLFX5DjV2Lx7VHMcy_Q-SuXuoT/view?usp=sharing",
-        "Z10 Station": "https://drive.google.com/file/d/1a3kfIBwz48PaXAHocRsrG9qc32_rTtt9/view?usp=sharing",
-        "Z20 Essential": "https://drive.google.com/file/d/1p4qVkD_OBQ4sKQxsO5P9z26JfXwBFDVx/view?usp=sharing",
-        "Z20 & Z30": "https://drive.google.com/file/d/1FfiAdLziAA-U2_KxwYzLzZFEU_9Zhohu/view?usp=sharing",
-        "Z20 AC & Z30 AC": "https://drive.google.com/file/d/1eJWOgOH-CpglP1JQNiBZ_j0ne7UEW8Ad/view?usp=sharing",
-        "Z40 Station": "https://drive.google.com/file/d/1DIrcAoRze1hTcL2GBXu1g3QcGMSZJNJo/view?usp=sharing",
-        "E10": "https://drive.google.com/file/d/1Q351DBeXaZUuX1tgGwzVsMrdWvraiwPN/view?usp=sharing",
-        # ДОБАВЬ МОДЕЛИ ДЛЯ ЭТОЙ КАТЕГОРИИ ЗДЕСЬ
-        # "Пример модели": "https://drive.google.com/...",
+        "folder": "vertical",
+        "models": [
+            "U10 & U20",
+            "R10 & R10 Pro",
+            "R10 Pro Aqua",
+            "R10s Essential",
+            "R10s & R10s Pro",
+            "R10s Aqua",
+            "R20 Essential",
+            "R20",
+            "R20 Aqua",
+            "Z10 Station",
+            "Z20 Essential",
+            "Z20 & Z30",
+            "Z20 AC & Z30 AC",
+            "Z40 Station",
+            "E10"
+        ]
     },
 
-        "💦 Моющие пылесосы": {
-        "G10 & G10 Combo": "https://drive.google.com/file/d/1MqAig9fKesw0TUZggfHuC2QUAXaZZsP3/view?usp=sharing",
-        "G10 Pro": "https://drive.google.com/file/d/1S_VUpB5JlF6UG9YYVC3GvNC6Y6EXQ0IV/view?usp=sharing",
-        "H11 Core": "https://drive.google.com/file/d/1dG_6bVJmmPRS-za51t4NbvAkcLTREhAB/view?usp=sharing",
-        "H12 & H12 Core": "https://drive.google.com/file/d/109pLAe7zgOG3kWduEiNy5xZy8hx8XikA/view?usp=sharing",
-        "H12S": "https://drive.google.com/file/d/1Is7XTMDEa-_1IJ_KAAE7aPs8VHP65aWe/view?usp=sharing",
-        "H12S AE": "https://drive.google.com/file/d/1pp9Ry8HnYlT7AsiQQIN7X6vR0Hon78a-/view?usp=sharing",
-        "H12 Pro & H12 Dual": "https://drive.google.com/file/d/17_s6yJfy4HVJGMPcvGURMGYJC0Q5wANv/view?usp=sharing",
-        "H12 FlexReach": "https://drive.google.com/file/d/1COScv0C26KiiMbzjh4OoXwzNV5IcxTkH/view?usp=sharing",
-        "H12 Pro FlexReach": "https://drive.google.com/file/d/1mSDOTl4St2lSI5X9tZ6jVzUvWSfrnu0P/view?usp=sharing",
-        "H12 Dual FlexReach": "https://drive.google.com/file/d/1aYwXkr5JY8h1JpJS7db3xHs8a-KEa4yY/view?usp=sharing",
-        "H13 Pro": "https://drive.google.com/file/d/1aYwXkr5JY8h1JpJS7db3xHs8a-KEa4yY/view?usp=sharing",
-        "H14 Dual": "https://drive.google.com/file/d/1PBogCf1CE05zMixTaZpicE45r5PlPLwu/view?usp=sharing",
-        "H15 Pro Heat": "https://drive.google.com/file/d/1r5HFJVRUDPQj9lL0ENld-vY3vZ5P5RO5/view?usp=sharing",
-        # ДОБАВЬ МОДЕЛИ ДЛЯ ЭТОЙ КАТЕГОРИИ ЗДЕСЬ
-        # "Пример модели": "https://drive.google.com/...",
+    "💦 Моющие пылесосы": {
+        "folder": "wash",
+        "models": [
+            "G10 & G10 Combo",
+            "G10 Pro",
+            "H11 Core",
+            "H12 & H12 Core",
+            "H12S",
+            "H12S AE",
+            "H12 Pro & H12 Dual",
+            "H12 FlexReach",
+            "H12 Pro FlexReach",
+            "H12 Dual FlexReach",
+            "H13 Pro",
+            "H14 Dual",
+            "H15 Pro Heat"
+        ]
     },
 
     "🌿 Роботы-газонокосилки": {
-        "A1 Pro": "https://drive.google.com/file/d/1lWlK8bxwg55hk-cxuC4ufZ5fJvgoGR_Q/view?usp=sharing",
-        # ДОБАВЬ МОДЕЛИ ДЛЯ ЭТОЙ КАТЕГОРИИ ЗДЕСЬ
-        # "Пример модели": "https://drive.google.com/...",
+        "folder": "mowers",
+        "models": [
+            "A1 Pro"
+        ]
     },
 
     "✨ Техника для ухода": {
-        "Mini": "https://drive.google.com/file/d/1h8gF6RRdx9sByoTDmHjouPbUGTnXw2NB/view?usp=sharing",
-        "Gleam": "https://drive.google.com/file/d/1Gt5DPdOap7oSWOpD8zQfn0Y4-0oZ5HSD/view?usp=sharing",
-        "Glory": "https://drive.google.com/file/d/1aTPvu7VKsgt056MsJkO8qg7TpE8-CJ1X/view?usp=sharing",
-        "Glory Mix": "https://drive.google.com/file/d/1AwPVFenkaG-NVl0zufGUEzSQYrXHkS2u/view?usp=sharing",
-        "Glory Master": "https://drive.google.com/file/d/11P2i1089RdeSVWutM_zUGCVa9w_Pxdsc/view?usp=sharing",
-        "Pocket": "https://drive.google.com/file/d/14SPXV7CNyiRXIBkC0LTz0SnQt5aAdgZP/view?usp=sharing",
-        "Pocket Ultra": "https://drive.google.com/file/d/11JNsWC8u_rrOLt5YwcgIlASxpa2giqBF/view?usp=sharing",
-        "Gusto": "https://drive.google.com/file/d/1p1SKo0Ue9WtQbOUyEJYD2-bvkKhbYyJa/view?usp=sharing",
-        "Miracle": "https://drive.google.com/file/d/16RBqYGBc46qt_VegWHqZ6i_qxgk2WeLH/view?usp=sharing",
-        "Miracle Pro": "https://drive.google.com/file/d/1OyInKC4XWuTpGPH896JlQJ93SQJTHT-N/view?usp=sharing",
-        "Pilot": "https://drive.google.com/file/d/1ASrlxeR_RpPx33-hDT3zeqIacaQnJJjg/view?usp=sharing",
-        "Dazzle": "https://drive.google.com/file/d/1EUipnwwGm8qzGKZUiCPV4d_yY8T4xeQe/view?usp=sharing",
-        "AirStyle": "https://drive.google.com/file/d/1ODzX8nIFE25Vn1xe4k0dHfv09NUa1keF/view?usp=sharing",
-        "AirStyle Pro": "https://drive.google.com/file/d/1ZG4Q_JSJmf56B-vSwFWQDVIEqeonccxx/view?usp=sharing",
-        "AirStyle Pro Hi": "https://disk.yandex.ru/i/olq0VW3gPYt89Q",
-        "Aero Straight": "https://drive.google.com/file/d/1mSQL-aGY3pWKg7OgU5QO3xEusLuPA1ge/view?usp=sharing",
-        "Hair Removal": "https://drive.google.com/file/d/18lpPBEhpzPuuQT9TcDov9T3lZ9Kzn8wJ/view?usp=sharing",
-        "S7": "https://drive.google.com/file/d/1yxitvnxo3cqcxgaMWGhFBviQnhtTUNcA/view?usp=sharing",
-        # ДОБАВЬ МОДЕЛИ ДЛЯ ЭТОЙ КАТЕГОРИИ ЗДЕСЬ
-        # "Пример модели": "https://drive.google.com/...",
+        "folder": "care",
+        "models": [
+            "Mini",
+            "Gleam",
+            "Glory",
+            "Glory Mix",
+            "Glory Master",
+            "Pocket",
+            "Pocket Ultra",
+            "Gusto",
+            "Miracle",
+            "Miracle Pro",
+            "Pilot",
+            "Dazzle",
+            "AirStyle",
+            "AirStyle Pro",
+            "AirStyle Pro Hi",
+            "Aero Straight",
+            "Hair Removal",
+            "S7"
+        ]
     },
     
     "🌡️ Климат": {
-        "PM10 & PM20": "https://drive.google.com/file/d/1oyKd_w74F_xDrZ35nR0RaztHmznvN8qu/view?usp=sharing",
-        "PM30": "https://drive.google.com/file/d/1j9ffL1VKCPUZVvk1SFUWQuLo9bvG6-I8/view?usp=sharing",
-        "H40 & H40 Essential": "https://drive.google.com/file/d/1NGEZFnKBrh7TfPnwh5NgK67oIpxkhvp9/view?usp=sharing",
-        "AP10": "https://drive.google.com/file/d/1EF1IeQ4D7JxSs0RgZlCb1pPEKZvHQLPX/view?usp=sharing",
-        "HT30 Ultra": "https://drive.google.com/file/d/1MqBIguhks73Nms-7ugvl3NFFzigZGWmW/view?usp=sharing",
-        # ДОБАВЬ МОДЕЛИ ДЛЯ ЭТОЙ КАТЕГОРИИ ЗДЕСЬ
-        # "Пример модели": "https://drive.google.com/...",
+        "folder": "climate",
+        "models": [
+            "PM10 & PM20",
+            "PM30",
+            "H40 & H40 Essential",
+            "AP10",
+            "HT30 Ultra"
+        ]
     },
     
     "🍗 Аэрогрили": {
-        "AF30": "https://drive.google.com/file/d/1m5vy8vibl9xKRUel40szD-qTf9EPkYIm/view?usp=sharing",
-        # ДОБАВЬ МОДЕЛИ АЭРОГРИЛЕЙ ЗДЕСЬ
-        # "Пример аэрогриля": "https://drive.google.com/...",
+        "folder": "airfry",
+        "models": [
+            "AF30"
+        ]
     },
 
     "🏠 Для дома": {
-        "S10": "https://drive.google.com/file/d/19LdvfW8IVe1T6trhgimYk764z1V2-uZp/view?usp=sharing",
-        "DF10 & DF10 Pro": "https://drive.google.com/file/d/1RWR_zJW1Jhm7hpFnw1aWgAHGUwc__Qc0/view?usp=sharing",
-        # ДОБАВЬ МОДЕЛИ ДЛЯ ЭТОЙ КАТЕГОРИИ ЗДЕСЬ
-        # "Пример модели": "https://drive.google.com/...",
+        "folder": "home",
+        "models": [
+            "S10",
+            "DF10 & DF10 Pro"
+        ]
     },
 }
 
-# Маппинг коротких имен категорий для callback_data
-CATEGORY_SHORT_NAMES = {
-    "🤖 Роботы-пылесосы": "robots",
-    "✨ Техника для ухода": "care",
-    "🌿 Роботы-газонокосилки": "mowers",
-    "💦 Моющие пылесосы": "wash",
-    "🌡️ Климат": "climate",
-    "🏠 Для дома": "home",
-    "🔋 Вертикальные пылесосы": "vertical",
-    "🍗 Аэрогрили": "airfry",
-}
+# Создаем список категорий для удобства
+CATEGORY_ITEMS = list(CATEGORIES.items())
 
-# Обратный маппинг
-SHORT_TO_FULL_CATEGORY = {v: k for k, v in CATEGORY_SHORT_NAMES.items()}
+# Путь к папке с PDF-файлами
+PDF_BASE_PATH = r"C:\dreame_learn\pdfs"
 
 # ==============================
 # ФУНКЦИИ ДЛЯ СОЗДАНИЯ КЛАВИАТУР
@@ -163,65 +167,54 @@ SHORT_TO_FULL_CATEGORY = {v: k for k, v in CATEGORY_SHORT_NAMES.items()}
 def create_main_keyboard():
     """Создает главную клавиатуру с категориями"""
     keyboard = []
-    categories = list(CATEGORIES.keys())
     
-    # Сортируем категории, чтобы "🤖 Роботы-пылесосы" была первой
+    # Сортируем чтобы роботы-пылесосы были первыми
+    categories = list(CATEGORIES.keys())
     if "🤖 Роботы-пылесосы" in categories:
         categories.remove("🤖 Роботы-пылесосы")
         categories.insert(0, "🤖 Роботы-пылесосы")
     
-    # Создаем кнопки категорий (по 1 в ряд)
-    for category_name in categories:
-        model_count = len(CATEGORIES[category_name])
-        short_name = CATEGORY_SHORT_NAMES.get(category_name, "unknown")
-        display_text = f"{category_name} [{model_count}]" if model_count > 0 else f"{category_name} [0]"
-        keyboard.append([InlineKeyboardButton(display_text, callback_data=f"cat_{short_name}")])
+    # Создаем кнопки для каждой категории
+    for i, category_name in enumerate(categories):
+        model_count = len(CATEGORIES[category_name]["models"])
+        display_text = f"{category_name} [{model_count}]"
+        # Используем короткое имя папки для callback
+        folder_name = CATEGORIES[category_name]["folder"]
+        keyboard.append([InlineKeyboardButton(display_text, callback_data=f"cat_{folder_name}")])
     
     # Добавляем кнопку помощи
     keyboard.append([InlineKeyboardButton("❓ Помощь", callback_data="help")])
     
     return InlineKeyboardMarkup(keyboard)
 
-def create_category_keyboard(category_short_name):
+def create_category_keyboard(folder_name):
     """Создает клавиатуру с моделями выбранной категории"""
-    category_name = SHORT_TO_FULL_CATEGORY.get(category_short_name)
-    if not category_name:
-        # Если передан callback_name, ищем полное имя с эмодзи
-        for full_name in CATEGORIES.keys():
-            if category_short_name in full_name:
-                category_name = full_name
-                break
+    # Находим категорию по имени папки
+    category_name = None
+    category_index = None
+    models = None
     
-    if not category_name:
-        # Если категория не найдена
-        keyboard = [
-            [InlineKeyboardButton("◀️ Назад", callback_data="back_to_main")],
-            [InlineKeyboardButton("❓ Помощь", callback_data="help")]
-        ]
-        return InlineKeyboardMarkup(keyboard)
-    
-    models = CATEGORIES.get(category_name, {})
+    for i, (name, data) in enumerate(CATEGORY_ITEMS):
+        if data["folder"] == folder_name:
+            category_name = name
+            category_index = i
+            models = data["models"]
+            break
     
     if not models:
-        # Если категория пустая
-        keyboard = [
-            [InlineKeyboardButton("◀️ Назад", callback_data="back_to_main")],
-            [InlineKeyboardButton("❓ Помощь", callback_data="help")]
-        ]
-        return InlineKeyboardMarkup(keyboard)
+        return create_main_keyboard()
     
     keyboard = []
-    models_list = list(models.keys())
     
-    # Создаем кнопки моделей (по 1 в ряд для читаемости)
-    for i, model_name in enumerate(models_list):
-        # Обрезаем длинные названия моделей
-        display_name = model_name[:30] + "..." if len(model_name) > 30 else model_name
-        # Используем индекс вместо полного имени в callback_data
-        keyboard.append([InlineKeyboardButton(display_name, callback_data=f"model_{category_short_name}_{i}")])
+    # Создаем кнопки для каждой модели
+    for i, model_name in enumerate(models):
+        # Обрезаем длинные названия
+        display_name = model_name[:35] + "..." if len(model_name) > 35 else model_name
+        # Используем folder_name и индекс модели
+        keyboard.append([InlineKeyboardButton(display_name, callback_data=f"model_{folder_name}_{i}")])
     
     # Добавляем кнопки навигации
-    keyboard.append([InlineKeyboardButton("◀️ Назад", callback_data="back_to_main")])
+    keyboard.append([InlineKeyboardButton("◀️ Назад в меню", callback_data="back_to_main")])
     keyboard.append([InlineKeyboardButton("❓ Помощь", callback_data="help")])
     
     return InlineKeyboardMarkup(keyboard)
@@ -234,17 +227,20 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Отправляет приветственное сообщение с категориями"""
     user = update.effective_user
     
-    # Подсчитываем общую статистику
+    # Подсчитываем статистику
     total_categories = len(CATEGORIES)
-    total_models = sum(len(models) for models in CATEGORIES.values())
+    total_models = sum(len(cat["models"]) for cat in CATEGORIES.values())
     
-    # Краткое приветствие
-    await update.message.reply_text(
+    welcome_text = (
         f"👋 *Привет, {user.first_name}!*\n\n"
-        f"*Каталог техники*\n"
+        f"📁 *Каталог техники Dreame*\n"
         f"▫️ Категорий: {total_categories}\n"
         f"▫️ Моделей: {total_models}\n\n"
-        f"Выберите категорию:",
+        f"Выберите категорию:"
+    )
+    
+    await update.message.reply_text(
+        welcome_text,
         reply_markup=create_main_keyboard(),
         parse_mode='Markdown'
     )
@@ -254,31 +250,27 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     query = update.callback_query
     await query.answer()
     
+    logger.info(f"Получен callback: {query.data}")
+    
     if query.data == "help":
-        await help_command_callback(update, context)
-        return
+        await show_help(query)
     
-    if query.data == "back_to_main":
-        await show_main_menu(update, context)
-        return
+    elif query.data == "back_to_main":
+        await show_main_menu(query)
     
-    if query.data.startswith("cat_"):
-        await show_category_models(update, context)
-        return
+    elif query.data.startswith("cat_"):
+        await show_category(query)
     
-    if query.data.startswith("model_"):
-        await show_model_pdf(update, context)
+    elif query.data.startswith("model_"):
+        await send_pdf_file(query)
+    
+    else:
+        logger.warning(f"Неизвестный callback: {query.data}")
 
-# ==============================
-# ФУНКЦИИ ОТОБРАЖЕНИЯ
-# ==============================
-
-async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Показывает главное меню с категориями"""
-    query = update.callback_query
-    
+async def show_main_menu(query):
+    """Показывает главное меню"""
     total_categories = len(CATEGORIES)
-    total_models = sum(len(models) for models in CATEGORIES.values())
+    total_models = sum(len(cat["models"]) for cat in CATEGORIES.values())
     
     await query.edit_message_text(
         f"📁 *Каталог техники*\n\n"
@@ -289,194 +281,184 @@ async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         parse_mode='Markdown'
     )
 
-async def show_category_models(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def show_category(query):
     """Показывает модели выбранной категории"""
-    query = update.callback_query
+    # Получаем имя папки из callback (cat_robots, cat_vertical и т.д.)
+    folder_name = query.data.replace("cat_", "")
     
-    # Получаем короткое имя категории
-    category_short_name = query.data.replace("cat_", "")
+    # Находим категорию по имени папки
+    category_name = None
+    for name, data in CATEGORY_ITEMS:
+        if data["folder"] == folder_name:
+            category_name = name
+            models = data["models"]
+            break
     
-    category_name = SHORT_TO_FULL_CATEGORY.get(category_short_name)
     if not category_name:
         await query.edit_message_text("Категория не найдена")
-        return
-    
-    models = CATEGORIES[category_name]
-    
-    if not models:
-        await query.edit_message_text(
-            f"{category_name}\n\n"
-            "В этой категории пока нет моделей.\n"
-            "Модели будут добавлены позже.",
-            reply_markup=create_category_keyboard(category_short_name),
-            parse_mode='Markdown'
-        )
         return
     
     await query.edit_message_text(
         f"{category_name}\n\n"
         f"*Доступно моделей: {len(models)}*\n"
         f"Выберите модель:",
-        reply_markup=create_category_keyboard(category_short_name),
+        reply_markup=create_category_keyboard(folder_name),
         parse_mode='Markdown'
     )
 
-async def show_model_pdf(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Показывает информацию о модели с кнопкой для открытия PDF"""
-    query = update.callback_query
-    
-    # Получаем данные из callback
+async def send_pdf_file(query):
+    """Отправляет PDF-файл пользователю"""
+    # Парсим данные из callback (model_robots_0, model_vertical_5 и т.д.)
     parts = query.data.split("_")
     if len(parts) != 3:
-        await query.edit_message_text("Ошибка данных")
+        await query.message.reply_text("Ошибка в данных модели")
         return
     
-    category_short_name = parts[1]
+    folder_name = parts[1]
     try:
         model_index = int(parts[2])
     except ValueError:
-        await query.edit_message_text("Ошибка в данных модели")
+        await query.message.reply_text("Ошибка в индексе модели")
         return
     
-    category_name = SHORT_TO_FULL_CATEGORY.get(category_short_name)
-    if not category_name or category_name not in CATEGORIES:
-        await query.edit_message_text("Категория не найдена")
+    # Находим категорию и модель по folder_name
+    category_name = None
+    category_data = None
+    for name, data in CATEGORY_ITEMS:
+        if data["folder"] == folder_name:
+            category_name = name
+            category_data = data
+            break
+    
+    if not category_data:
+        await query.message.reply_text("Категория не найдена")
         return
     
-    models = CATEGORIES[category_name]
-    models_list = list(models.items())
-    
-    if model_index < 0 or model_index >= len(models_list):
-        await query.edit_message_text("Модель не найдена")
+    models = category_data["models"]
+    if model_index < 0 or model_index >= len(models):
+        await query.message.reply_text("Модель не найдена")
         return
     
-    model_name, pdf_url = models_list[model_index]
+    model_name = models[model_index]
     
-    # Создаем клавиатуру
-    keyboard = [
-        [InlineKeyboardButton("📄 ОТКРЫТЬ PDF", url=pdf_url)],
-        [InlineKeyboardButton(f"◀️ Назад к {category_name.split()[0]}", callback_data=f"cat_{category_short_name}")],
-        [InlineKeyboardButton("🏠 Главное меню", callback_data="back_to_main")]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    # Формируем путь к файлу
+    file_name = f"{model_name}.pdf"
+    # Убираем недопустимые символы из имени файла
+    safe_file_name = "".join(c for c in file_name if c not in r'<>:"/\|?*').strip()
+    file_path = os.path.join(PDF_BASE_PATH, folder_name, safe_file_name)
     
-    # Отправляем сообщение
-    await query.edit_message_text(
-        text=f"{category_name}\n"
-             f"*{model_name}*\n\n"
-             f"Нажмите кнопку ниже для открытия PDF:",
-        reply_markup=reply_markup,
+    try:
+        # Проверяем существует ли файл
+        if os.path.exists(file_path):
+            # Открываем и отправляем файл
+            with open(file_path, 'rb') as pdf_file:
+                await query.message.reply_document(
+                    document=pdf_file,
+                    filename=f"{model_name}.pdf",
+                    caption=f"📄 *{model_name}*\n{category_name}",
+                    parse_mode='Markdown'
+                )
+            
+            # Отправляем подтверждение с кнопкой назад
+            keyboard = [[
+                InlineKeyboardButton("◀️ Назад к моделям", callback_data=f"cat_{folder_name}")
+            ]]
+            await query.message.reply_text(
+                "✅ PDF успешно отправлен!",
+                reply_markup=InlineKeyboardMarkup(keyboard)
+            )
+        else:
+            # Если файл не найден, показываем доступные файлы для отладки
+            await handle_file_not_found(query, file_path, folder_name, model_name, folder_name)
+            
+    except Exception as e:
+        logger.error(f"Ошибка при отправке файла: {e}")
+        await query.message.reply_text(f"❌ Ошибка при отправке файла: {str(e)}")
+
+async def handle_file_not_found(query, file_path, folder_name, model_name, folder_name_for_back):
+    """Обрабатывает ситуацию, когда файл не найден"""
+    folder_path = os.path.join(PDF_BASE_PATH, folder_name)
+    
+    error_text = f"❌ Файл для модели *{model_name}* не найден.\n\n"
+    error_text += f"🔍 Искали: `{file_path}`\n\n"
+    
+    # Проверяем существует ли папка
+    if os.path.exists(folder_path):
+        files = os.listdir(folder_path)
+        if files:
+            error_text += f"📁 В папке `{folder_name}` найдены файлы:\n"
+            # Показываем первые 10 файлов
+            for f in files[:10]:
+                error_text += f"   • {f}\n"
+            if len(files) > 10:
+                error_text += f"   ... и ещё {len(files) - 10} файлов\n"
+        else:
+            error_text += f"📁 Папка `{folder_name}` пуста\n"
+    else:
+        error_text += f"📁 Папка `{folder_name}` не существует!\n"
+        error_text += f"   Создайте папку: {folder_path}\n"
+    
+    keyboard = [[
+        InlineKeyboardButton("◀️ Назад к моделям", callback_data=f"cat_{folder_name_for_back}")
+    ]]
+    
+    await query.message.reply_text(
+        error_text,
+        reply_markup=InlineKeyboardMarkup(keyboard),
         parse_mode='Markdown'
     )
 
-# ==============================
-# КОМАНДА ПОМОЩИ
-# ==============================
-
-async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Обработчик команды /help"""
-    keyboard = [
-        [InlineKeyboardButton("🏠 Главное меню", callback_data="back_to_main")]
-    ]
-    
-    await update.message.reply_text(
+async def show_help(query):
+    """Показывает справку"""
+    help_text = (
         "❓ *Помощь*\n\n"
-        "*Навигация:*\n"
-        "1. Выберите категорию\n"
-        "2. Выберите модель\n"
-        "3. Нажмите '📄 ОТКРЫТЬ PDF'\n\n"
-        "*PDF презентации:*\n"
-        "• Открываются в браузере\n"
-        "• Доступны для скачивания\n\n"
-        "*Проблемы?*\n"
-        "• Проверьте интернет\n"
-        "• Попробуйте другой браузер",
-        reply_markup=InlineKeyboardMarkup(keyboard),
-        parse_mode='Markdown'
+        "*Как пользоваться:*\n"
+        "1. Выберите категорию техники\n"
+        "2. Выберите нужную модель\n"
+        "3. Бот отправит PDF-файл с инструкцией\n\n"
+        "*Команды:*\n"
+        "• /start - начать работу\n"
+        "• /help - эта справка\n"
+        "• /stats - статистика каталога\n\n"
+        "*Поддержка:*\n"
+        "Если файл не отправляется, проверьте:\n"
+        "• Название модели точно совпадает с файлом\n"
+        "• Файл есть в нужной папке на сервере"
     )
-
-async def help_command_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Обработчик кнопки помощи из callback"""
-    query = update.callback_query
     
-    keyboard = [
-        [InlineKeyboardButton("🏠 Главное меню", callback_data="back_to_main")]
-    ]
-    
+    keyboard = [[InlineKeyboardButton("🏠 В меню", callback_data="back_to_main")]]
     await query.edit_message_text(
-        text="❓ *Помощь*\n\n"
-             "*Как пользоваться:*\n"
-             "1. Выберите категорию\n"
-             "2. Выберите модель\n"
-             "3. Нажмите кнопку PDF\n\n"
-             "Все просто! 👍",
+        help_text,
         reply_markup=InlineKeyboardMarkup(keyboard),
         parse_mode='Markdown'
     )
-
-# ==============================
-# СТАТИСТИКА
-# ==============================
 
 async def stats_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Показывает статистику по каталогу"""
     total_categories = len(CATEGORIES)
-    total_models = sum(len(models) for models in CATEGORIES.values())
+    total_models = sum(len(cat["models"]) for cat in CATEGORIES.values())
     
-    stats_text = "📊 *Статистика:*\n\n"
+    stats_text = "📊 *Статистика каталога:*\n\n"
     
-    for category_name, models in CATEGORIES.items():
-        model_count = len(models)
-        stats_text += f"{category_name}: {model_count}\n"
+    for category_name, category_data in CATEGORIES.items():
+        model_count = len(category_data["models"])
+        stats_text += f"{category_name}: {model_count} моделей\n"
     
-    stats_text += f"\n*Итого:* {total_models} моделей"
+    stats_text += f"\n*Всего:* {total_models} моделей в {total_categories} категориях"
     
     await update.message.reply_text(stats_text, parse_mode='Markdown')
 
-# ==============================
-# КОМАНДА ДЛЯ ДОБАВЛЕНИЯ НОВЫХ МОДЕЛЕЙ
-# ==============================
-
-async def add_model_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Инструкция по добавлению новых моделей"""
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Обработчик команды /help"""
+    keyboard = [[InlineKeyboardButton("🏠 В меню", callback_data="back_to_main")]]
     
-    help_text = (
-        "📝 *Добавление моделей*\n\n"
-        "*Формат:*\n"
-        "```python\n"
-        "'🤖 Роботы-пылесосы': {\n"
-        "    'Новая модель': 'https://...',\n"
-        "},\n"
-        "```\n\n"
-        "*Категории:*\n"
+    await update.message.reply_text(
+        "❓ *Помощь*\n\n"
+        "Бот для получения PDF-инструкций по технике Dreame.\n\n"
+        "Используйте /start для начала работы.",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+        parse_mode='Markdown'
     )
-    
-    for category in CATEGORIES.keys():
-        count = len(CATEGORIES[category])
-        help_text += f"• {category} ({count})\n"
-    
-    await update.message.reply_text(help_text, parse_mode='Markdown')
-
-# ==============================
-# КОМАНДА КАТАЛОГ (показать все категории)
-# ==============================
-
-async def catalog_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Показывает все категории"""
-    total_models = sum(len(models) for models in CATEGORIES.values())
-    
-    catalog_text = "📂 *Все категории:*\n\n"
-    
-    for category_name, models in CATEGORIES.items():
-        model_count = len(models)
-        if model_count > 0:
-            catalog_text += f"{category_name} - {model_count} моделей\n"
-        else:
-            catalog_text += f"{category_name} - пусто\n"
-    
-    catalog_text += f"\n*Всего моделей:* {total_models}"
-    
-    await update.message.reply_text(catalog_text, parse_mode='Markdown')
 
 # ==============================
 # ЗАПУСК БОТА
@@ -484,36 +466,61 @@ async def catalog_command(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
 def main() -> None:
     """Запуск бота"""
-    # Создаем Application
+    # Создаем приложение
     application = Application.builder().token(BOT_TOKEN).build()
     
     # Регистрируем обработчики команд
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("stats", stats_command))
-    application.add_handler(CommandHandler("addhelp", add_model_help))
-    application.add_handler(CommandHandler("catalog", catalog_command))
     
-    # Регистрируем обработчики callback'ов
+    # Регистрируем обработчик callback-запросов (кнопки)
     application.add_handler(CallbackQueryHandler(button_handler))
     
+    # Проверяем существование базовой папки с PDF
+    print("\n" + "="*50)
+    print("🔍 Проверка папок с PDF...")
+    print("="*50)
+    
+    if os.path.exists(PDF_BASE_PATH):
+        print(f"✅ Папка с PDF найдена: {PDF_BASE_PATH}")
+        
+        # Проверяем подпапки
+        for category_name, category_data in CATEGORIES.items():
+            folder_path = os.path.join(PDF_BASE_PATH, category_data["folder"])
+            if os.path.exists(folder_path):
+                files = os.listdir(folder_path)
+                pdf_files = [f for f in files if f.lower().endswith('.pdf')]
+                print(f"   📁 {category_data['folder']}: {len(pdf_files)} PDF файлов")
+                
+                # Проверяем соответствие моделей
+                models = category_data["models"]
+                found_models = []
+                missing_models = []
+                
+                for model in models:
+                    expected_file = f"{model}.pdf"
+                    if expected_file in files or expected_file.lower() in [f.lower() for f in files]:
+                        found_models.append(model)
+                    else:
+                        missing_models.append(model)
+                
+                if missing_models:
+                    print(f"      ⚠️ Отсутствуют {len(missing_models)} файлов")
+            else:
+                print(f"   ⚠️ Папка {folder_path} не существует!")
+    else:
+        print(f"❌ Папка с PDF не найдена: {PDF_BASE_PATH}")
+        print("Создайте папку и положите в неё PDF-файлы")
+    
     # Запускаем бота
-    print("=" * 40)
-    print("🤖 Бот запущен")
-    print("=" * 40)
-    
-    # Выводим информацию
-    total_models = sum(len(models) for models in CATEGORIES.values())
-    print(f"Категорий: {len(CATEGORIES)}")
-    print(f"Моделей: {total_models}")
-    
-    print("\n📋 Команды:")
-    print("/start - начать")
-    print("/help - помощь")
-    print("/stats - статистика")
-    print("/catalog - все категории")
-    print("/addhelp - как добавлять модели")
-    print("=" * 40)
+    print("\n" + "="*50)
+    print("🤖 Бот для каталога Dreame запущен!")
+    print("="*50)
+    print(f"📁 Категорий: {len(CATEGORIES)}")
+    print(f"📄 Всего моделей: {sum(len(cat['models']) for cat in CATEGORIES.values())}")
+    print(f"📂 Путь к PDF: {PDF_BASE_PATH}")
+    print("="*50 + "\n")
     
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
