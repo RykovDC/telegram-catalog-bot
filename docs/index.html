@@ -6,296 +6,108 @@
     <title>Dreame Каталог</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 12px;
-            background-color: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
-            min-height: 100vh;
-        }
-
-        .header {
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--tg-theme-hint-color, #e0e0e0);
-        }
-
-        .header h1 {
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .header p {
-            font-size: 14px;
-            color: var(--tg-theme-hint-color, #666666);
-        }
-
-        .stats {
-            background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-around;
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--tg-theme-button-color, #40a7e3);
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: var(--tg-theme-hint-color, #666666);
-        }
-
-        .category-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .category-card {
-            background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
-            border-radius: 12px;
-            padding: 16px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: 1px solid transparent;
-        }
-
-        .category-card:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-            border-color: var(--tg-theme-button-color, #40a7e3);
-        }
-
-        .category-card h3 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .category-card p {
-            font-size: 13px;
-            color: var(--tg-theme-hint-color, #666666);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .model-count {
-            background-color: var(--tg-theme-button-color, #40a7e3);
-            color: var(--tg-theme-button-text-color, #ffffff);
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 500;
-        }
-
-        .back-button {
-            background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
-            border: none;
-            border-radius: 10px;
-            padding: 12px 16px;
-            font-size: 15px;
-            font-weight: 500;
-            cursor: pointer;
-            margin-bottom: 16px;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            transition: opacity 0.2s;
-            color: var(--tg-theme-text-color, #000000);
-        }
-
-        .back-button:hover {
-            opacity: 0.8;
-        }
-
-        .models-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .model-item {
-            background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
-            border-radius: 10px;
-            padding: 14px 16px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid transparent;
-            font-size: 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .model-item:hover {
-            border-color: var(--tg-theme-button-color, #40a7e3);
-            transform: translateX(2px);
-        }
-
-        .model-item .send-icon {
-            opacity: 0.5;
-            font-size: 12px;
-        }
-
-        .model-item:hover .send-icon {
-            opacity: 1;
-            color: var(--tg-theme-button-color, #40a7e3);
-        }
-
-        .model-detail {
-            background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
-            border-radius: 16px;
-            padding: 24px 16px;
-            text-align: center;
-        }
-
-        .model-detail h2 {
-            font-size: 22px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .model-detail .category-badge {
-            background-color: var(--tg-theme-button-color, #40a7e3);
-            color: var(--tg-theme-button-text-color, #ffffff);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 13px;
-            display: inline-block;
-            margin-bottom: 24px;
-        }
-
-        .get-pdf-button {
-            background-color: var(--tg-theme-button-color, #40a7e3);
-            color: var(--tg-theme-button-text-color, #ffffff);
-            border: none;
-            border-radius: 12px;
-            padding: 16px 24px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            margin: 20px 0;
-            transition: opacity 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .get-pdf-button:hover {
-            opacity: 0.9;
-        }
-
-        .get-pdf-button:active {
-            transform: scale(0.98);
-        }
-
-        .get-pdf-button.sent {
-            background-color: #4CAF50;
-        }
-
-        .search-box {
-            width: 100%;
-            padding: 12px 16px;
-            border: none;
-            background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
-            border-radius: 10px;
-            margin-bottom: 16px;
-            font-size: 14px;
-            color: var(--tg-theme-text-color, #000000);
-            outline: none;
-        }
-
-        .search-box::placeholder {
-            color: var(--tg-theme-hint-color, #999999);
-        }
-
-        .footer-nav {
-            margin-top: 20px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .footer-nav button {
-            flex: 1;
-            background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
-            border: none;
-            border-radius: 8px;
-            padding: 10px;
-            font-size: 13px;
-            cursor: pointer;
-            color: var(--tg-theme-text-color, #000000);
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: var(--tg-theme-hint-color, #666666);
-        }
-
-        .toast {
+        /* ... (ваши старые стили остаются без изменений) ... */
+        /* Добавьте в конец стилей: */
+        .debug-panel {
             position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: var(--tg-theme-button-color, #40a7e3);
-            color: var(--tg-theme-button-text-color, #ffffff);
-            padding: 12px 24px;
-            border-radius: 30px;
-            font-size: 14px;
-            font-weight: 500;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            z-index: 1000;
-            transition: opacity 0.3s;
-            opacity: 0;
-            pointer-events: none;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.9);
+            color: #00ff00;
+            font-family: monospace;
+            font-size: 10px;
+            padding: 8px;
+            z-index: 10000;
+            max-height: 150px;
+            overflow-y: auto;
+            border-top: 2px solid #ffaa00;
+            display: none;
         }
-
-        .toast.show {
+        .debug-panel.visible {
+            display: block;
+        }
+        .debug-button {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            z-index: 10001;
+            background: #ffaa00;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+        .debug-button:hover {
             opacity: 1;
         }
     </style>
 </head>
 <body>
+    <!-- Панель отладки -->
+    <div id="debugPanel" class="debug-panel">
+        <div id="debugLog"></div>
+    </div>
+    <button class="debug-button" onclick="toggleDebug()">🐛 DEBUG</button>
+
     <div id="toast" class="toast">Запрос отправлен! ✨</div>
     <div id="app">
         <div class="loading">Загрузка...</div>
     </div>
 
     <script>
-        // Инициализация Telegram Web App
-        const tg = window.Telegram.WebApp;
+        // ================== ОТЛАДКА ==================
+        let debugMessages = [];
         
-        // Настраиваем внешний вид
-        tg.expand();
-        tg.enableClosingConfirmation();
+        function debugLog(message, data = null) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logMsg = `[${timestamp}] ${message}` + (data ? ` ${JSON.stringify(data)}` : '');
+            console.log('🔍 DEBUG:', logMsg);
+            
+            debugMessages.unshift(logMsg);
+            if (debugMessages.length > 20) debugMessages.pop();
+            
+            const logDiv = document.getElementById('debugLog');
+            if (logDiv) {
+                logDiv.innerHTML = debugMessages.map(msg => `→ ${msg}`).join('<br>');
+            }
+        }
         
-        // Проверяем, что WebApp инициализирован
-        console.log('Telegram Web App initialized:', tg.initData);
-        console.log('User:', tg.initDataUnsafe?.user);
+        function toggleDebug() {
+            const panel = document.getElementById('debugPanel');
+            panel.classList.toggle('visible');
+            debugLog('Панель отладки ' + (panel.classList.contains('visible') ? 'открыта' : 'закрыта'));
+        }
+
+        // ================== ИНИЦИАЛИЗАЦИЯ ==================
+        debugLog('Скрипт загружен');
         
-        // Данные из вашего bot.py
+        // Проверяем Telegram WebApp
+        if (!window.Telegram || !window.Telegram.WebApp) {
+            debugLog('❌ Telegram WebApp не найден!');
+        } else {
+            debugLog('✅ Telegram WebApp найден');
+            debugLog('Версия:', window.Telegram.WebApp.version);
+            debugLog('Platform:', window.Telegram.WebApp.platform);
+        }
+
+        const tg = window.Telegram?.WebApp;
+        
+        if (tg) {
+            tg.expand();
+            debugLog('WebApp развернут');
+            
+            // Проверяем initData
+            debugLog('initData есть:', !!tg.initData);
+            if (tg.initData) {
+                debugLog('initData длина:', tg.initData.length);
+            }
+        }
+
+        // ================== ДАННЫЕ ==================
         const categories = {
             "🤖 Роботы-пылесосы": {
                 folder: "robots",
@@ -441,27 +253,38 @@
         const totalCategories = Object.keys(categories).length;
         const totalModels = Object.values(categories).reduce((acc, cat) => acc + cat.models.length, 0);
 
-        // Функция для отправки команды боту
+        // ================== ОТПРАВКА ДАННЫХ ==================
         function requestPDFFromBot(folderName, modelName, modelIndex) {
-            console.log('📤 Отправка запроса боту:', {folderName, modelName, modelIndex});
+            debugLog('📤 НАЧАЛО ОТПРАВКИ', {folderName, modelName, modelIndex});
             
             // Показываем уведомление
             showToast('⏳ Отправляю запрос...');
             
-            // Формируем данные для отправки
+            // Проверяем tg
+            if (!tg) {
+                debugLog('❌ tg не существует!');
+                showToast('❌ Ошибка: WebApp не инициализирован');
+                return;
+            }
+            
+            // Формируем данные
             const data = {
                 action: 'get_pdf',
                 folder: folderName,
                 model: modelName,
-                index: modelIndex
+                index: modelIndex,
+                timestamp: Date.now()
             };
             
-            console.log('📦 Данные для отправки:', data);
+            const jsonData = JSON.stringify(data);
+            debugLog('📦 Данные подготовлены:', data);
+            debugLog('📦 JSON длина:', jsonData.length);
             
-            // Отправляем данные боту через Telegram
             try {
-                tg.sendData(JSON.stringify(data));
-                console.log('✅ Данные отправлены через tg.sendData()');
+                // ПРОБУЕМ ОТПРАВИТЬ
+                debugLog('📤 Вызываю tg.sendData()...');
+                tg.sendData(jsonData);
+                debugLog('✅ tg.sendData() выполнен без ошибок');
                 
                 // Меняем текст кнопки
                 const button = document.getElementById('pdfRequestButton');
@@ -474,14 +297,17 @@
                     }, 2000);
                 }
                 
-                showToast('✨ Запрос отправлен! Проверьте чат с ботом');
+                showToast('✨ Запрос отправлен! Проверьте чат');
+                
             } catch (error) {
-                console.error('❌ Ошибка отправки:', error);
-                showToast('❌ Ошибка отправки');
+                debugLog('❌ ОШИБКА ПРИ ОТПРАВКЕ:', error.toString());
+                showToast('❌ Ошибка: ' + error.message);
             }
+            
+            debugLog('📤 ОТПРАВКА ЗАВЕРШЕНА');
         }
 
-        // Функция для показа уведомления
+        // ================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==================
         function showToast(message) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -491,7 +317,7 @@
             }, 2000);
         }
 
-        // Рендеринг приложения
+        // ================== РЕНДЕРИНГ ==================
         function render() {
             const app = document.getElementById('app');
             
@@ -705,7 +531,7 @@
             currentCategory = categoryName;
             searchQuery = '';
             render();
-            tg.HapticFeedback.impactOccurred('light');
+            try { tg.HapticFeedback.impactOccurred('light'); } catch(e) {}
         }
 
         function selectModel(categoryName, modelIndex) {
@@ -713,7 +539,7 @@
             currentCategory = categoryName;
             currentModel = modelIndex;
             render();
-            tg.HapticFeedback.impactOccurred('medium');
+            try { tg.HapticFeedback.impactOccurred('medium'); } catch(e) {}
         }
 
         function goBack() {
@@ -736,16 +562,22 @@
 
         // Инициализация
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('DOM загружен, инициализация...');
+            debugLog('DOM загружен');
             render();
-            tg.ready();
-            console.log('Telegram Web App готов');
+            
+            if (tg) {
+                tg.ready();
+                debugLog('tg.ready() вызван');
+            }
             
             // Настраиваем основную кнопку
-            tg.MainButton.setText('Закрыть');
-            tg.MainButton.onClick(() => {
-                tg.close();
-            });
+            if (tg) {
+                tg.MainButton.setText('Закрыть');
+                tg.MainButton.onClick(() => {
+                    tg.close();
+                });
+                debugLog('MainButton настроен');
+            }
         });
 
         // Делаем функции глобальными
@@ -756,6 +588,8 @@
         window.requestPDFFromBot = requestPDFFromBot;
         window.searchModels = searchModels;
         window.filterModels = filterModels;
+        window.toggleDebug = toggleDebug;
+        window.debugLog = debugLog;
     </script>
 </body>
 </html>
