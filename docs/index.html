@@ -278,7 +278,7 @@
     </style>
 </head>
 <body>
-    <div id="toast" class="toast">PDF отправлен в чат!</div>
+    <div id="toast" class="toast">Запрос отправлен! ✨</div>
     <div id="app">
         <div class="loading">Загрузка...</div>
     </div>
@@ -290,6 +290,10 @@
         // Настраиваем внешний вид
         tg.expand();
         tg.enableClosingConfirmation();
+        
+        // Проверяем, что WebApp инициализирован
+        console.log('Telegram Web App initialized:', tg.initData);
+        console.log('User:', tg.initDataUnsafe?.user);
         
         // Данные из вашего bot.py
         const categories = {
@@ -439,26 +443,41 @@
 
         // Функция для отправки команды боту
         function requestPDFFromBot(folderName, modelName, modelIndex) {
-            // Показываем уведомление
-            showToast('Запрашиваю PDF...');
+            console.log('📤 Отправка запроса боту:', {folderName, modelName, modelIndex});
             
-            // Отправляем данные боту через Telegram
-            tg.sendData(JSON.stringify({
+            // Показываем уведомление
+            showToast('⏳ Отправляю запрос...');
+            
+            // Формируем данные для отправки
+            const data = {
                 action: 'get_pdf',
                 folder: folderName,
                 model: modelName,
                 index: modelIndex
-            }));
+            };
             
-            // Меняем текст кнопки, если мы на странице модели
-            const button = document.getElementById('pdfRequestButton');
-            if (button) {
-                button.textContent = '✅ Запрос отправлен!';
-                button.classList.add('sent');
-                setTimeout(() => {
-                    button.textContent = '📄 Получить PDF в чат';
-                    button.classList.remove('sent');
-                }, 2000);
+            console.log('📦 Данные для отправки:', data);
+            
+            // Отправляем данные боту через Telegram
+            try {
+                tg.sendData(JSON.stringify(data));
+                console.log('✅ Данные отправлены через tg.sendData()');
+                
+                // Меняем текст кнопки
+                const button = document.getElementById('pdfRequestButton');
+                if (button) {
+                    button.textContent = '✅ Запрос отправлен!';
+                    button.classList.add('sent');
+                    setTimeout(() => {
+                        button.textContent = '📄 Получить PDF в чат';
+                        button.classList.remove('sent');
+                    }, 2000);
+                }
+                
+                showToast('✨ Запрос отправлен! Проверьте чат с ботом');
+            } catch (error) {
+                console.error('❌ Ошибка отправки:', error);
+                showToast('❌ Ошибка отправки');
             }
         }
 
@@ -590,7 +609,7 @@
                     </button>
                     
                     <div style="margin-top: 20px; color: var(--tg-theme-hint-color); font-size: 12px;">
-                        PDF будет отправлен прямо в этот чат
+                        PDF будет отправлен в этот чат с ботом
                     </div>
                 </div>
                 
@@ -717,8 +736,10 @@
 
         // Инициализация
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM загружен, инициализация...');
             render();
             tg.ready();
+            console.log('Telegram Web App готов');
             
             // Настраиваем основную кнопку
             tg.MainButton.setText('Закрыть');
