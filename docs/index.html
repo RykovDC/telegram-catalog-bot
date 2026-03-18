@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dreame Каталог</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 12px;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            min-height: 100vh;
+        }
+
+        .header {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: var(--tg-theme-hint-color, #666666);
+        }
+
+        .stats {
+            background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--tg-theme-button-color, #40a7e3);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--tg-theme-hint-color, #666666);
+        }
+
+        .category-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .category-card {
+            background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .category-card:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            border-color: var(--tg-theme-button-color, #40a7e3);
+        }
+
+        .category-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .category-card p {
+            font-size: 13px;
+            color: var(--tg-theme-hint-color, #666666);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .model-count {
+            background-color: var(--tg-theme-button-color, #40a7e3);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .back-button {
+            background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-bottom: 16px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: opacity 0.2s;
+            color: var(--tg-theme-text-color, #000000);
+        }
+
+        .back-button:hover {
+            opacity: 0.8;
+        }
+
+        .models-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .model-item {
+            background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            border-radius: 10px;
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .model-item:hover {
+            border-color: var(--tg-theme-button-color, #40a7e3);
+            transform: translateX(2px);
+        }
+
+        .model-item .send-icon {
+            opacity: 0.5;
+            font-size: 12px;
+        }
+
+        .model-item:hover .send-icon {
+            opacity: 1;
+            color: var(--tg-theme-button-color, #40a7e3);
+        }
+
+        .model-detail {
+            background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            border-radius: 16px;
+            padding: 24px 16px;
+            text-align: center;
+        }
+
+        .model-detail h2 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .model-detail .category-badge {
+            background-color: var(--tg-theme-button-color, #40a7e3);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            display: inline-block;
+            margin-bottom: 24px;
+        }
+
+        .get-pdf-button {
+            background-color: var(--tg-theme-button-color, #40a7e3);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            border-radius: 12px;
+            padding: 16px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin: 20px 0;
+            transition: opacity 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .get-pdf-button:hover {
+            opacity: 0.9;
+        }
+
+        .get-pdf-button:active {
+            transform: scale(0.98);
+        }
+
+        .get-pdf-button.sent {
+            background-color: #4CAF50;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            border-radius: 10px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            color: var(--tg-theme-text-color, #000000);
+            outline: none;
+        }
+
+        .search-box::placeholder {
+            color: var(--tg-theme-hint-color, #999999);
+        }
+
+        .footer-nav {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .footer-nav button {
+            flex: 1;
+            background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 13px;
+            cursor: pointer;
+            color: var(--tg-theme-text-color, #000000);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--tg-theme-hint-color, #666666);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--tg-theme-button-color, #40a7e3);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transition: opacity 0.3s;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div id="toast" class="toast">PDF отправлен в чат!</div>
+    <div id="app">
+        <div class="loading">Загрузка...</div>
+    </div>
+
+    <script>
+        // Инициализация Telegram Web App
+        const tg = window.Telegram.WebApp;
+        
+        // Настраиваем внешний вид
+        tg.expand();
+        tg.enableClosingConfirmation();
+        
+        // Данные из вашего bot.py
+        const categories = {
+            "🤖 Роботы-пылесосы": {
+                folder: "robots",
+                icon: "🤖",
+                models: [
+                    "F9 Pro",
+                    "Серия F10",
+                    "F20",
+                    "F21",
+                    "F21 Plus",
+                    "D9 Max",
+                    "D9 Max Gen 2",
+                    "D9 Plus",
+                    "D10 Plus",
+                    "D10 Plus Gen 2",
+                    "D10s",
+                    "D10s Pro & D10s Plus",
+                    "Серия D20",
+                    "D30 Ultra",
+                    "L10s Pro",
+                    "L10s Plus & L10s Pro Gen 2",
+                    "L10 Ultra & L10 Prime",
+                    "L10s Ultra",
+                    "L10s Pro Ultra",
+                    "L20 Ultra Complete",
+                    "L30 Ultra",
+                    "L40",
+                    "L40 Ultra CE & L40s Ultra",
+                    "L40 Ultra AE",
+                    "L40s Pro Ultra",
+                    "X40 Ultra Complete",
+                    "Серия X50",
+                    "Matrix10 Ultra",
+                    "Aqua10 Ultra Roller Complete"
+                ]
+            },
+            "🔋 Вертикальные пылесосы": {
+                folder: "vertical",
+                icon: "🔋",
+                models: [
+                    "U10 & U20",
+                    "R10 & R10 Pro",
+                    "R10 Pro Aqua",
+                    "R10s Essential",
+                    "R10s & R10s Pro",
+                    "R10s Aqua",
+                    "R20 Essential",
+                    "R20",
+                    "R20 Aqua",
+                    "Z10 Station",
+                    "Z20 Essential",
+                    "Z20 & Z30",
+                    "Z20 AC & Z30 AC",
+                    "Z40 Station",
+                    "E10"
+                ]
+            },
+            "💦 Моющие пылесосы": {
+                folder: "wash",
+                icon: "💦",
+                models: [
+                    "G10 & G10 Combo",
+                    "G10 Pro",
+                    "H11 Core",
+                    "H12 & H12 Core",
+                    "H12S",
+                    "H12S AE",
+                    "H12 Pro & H12 Dual",
+                    "H12 FlexReach",
+                    "H12 Pro FlexReach",
+                    "H12 Dual FlexReach",
+                    "H13 Pro",
+                    "H14 Dual",
+                    "H15 Pro Heat"
+                ]
+            },
+            "🌿 Роботы-газонокосилки": {
+                folder: "mowers",
+                icon: "🌿",
+                models: [
+                    "A1 Pro"
+                ]
+            },
+            "✨ Техника для ухода": {
+                folder: "care",
+                icon: "✨",
+                models: [
+                    "Mini",
+                    "Gleam",
+                    "Glory",
+                    "Glory Mix",
+                    "Glory Master",
+                    "Pocket",
+                    "Pocket Ultra",
+                    "Gusto",
+                    "Miracle",
+                    "Miracle Pro",
+                    "Pilot",
+                    "Dazzle",
+                    "AirStyle",
+                    "AirStyle Pro",
+                    "AirStyle Pro Hi",
+                    "Aero Straight",
+                    "Hair Removal",
+                    "S7"
+                ]
+            },
+            "🌡️ Климат": {
+                folder: "climate",
+                icon: "🌡️",
+                models: [
+                    "PM10 & PM20",
+                    "PM30",
+                    "H40 & H40 Essential",
+                    "AP10",
+                    "HT30 Ultra"
+                ]
+            },
+            "🍗 Аэрогрили": {
+                folder: "airfry",
+                icon: "🍗",
+                models: [
+                    "AF30"
+                ]
+            },
+            "🏠 Для дома": {
+                folder: "home",
+                icon: "🏠",
+                models: [
+                    "S10",
+                    "DF10 & DF10 Pro"
+                ]
+            }
+        };
+
+        // Состояние приложения
+        let currentView = 'main';
+        let currentCategory = null;
+        let currentModel = null;
+        let searchQuery = '';
+
+        // Подсчет статистики
+        const totalCategories = Object.keys(categories).length;
+        const totalModels = Object.values(categories).reduce((acc, cat) => acc + cat.models.length, 0);
+
+        // Функция для отправки команды боту
+        function requestPDFFromBot(folderName, modelName, modelIndex) {
+            // Показываем уведомление
+            showToast('Запрашиваю PDF...');
+            
+            // Отправляем данные боту через Telegram
+            tg.sendData(JSON.stringify({
+                action: 'get_pdf',
+                folder: folderName,
+                model: modelName,
+                index: modelIndex
+            }));
+            
+            // Меняем текст кнопки, если мы на странице модели
+            const button = document.getElementById('pdfRequestButton');
+            if (button) {
+                button.textContent = '✅ Запрос отправлен!';
+                button.classList.add('sent');
+                setTimeout(() => {
+                    button.textContent = '📄 Получить PDF в чат';
+                    button.classList.remove('sent');
+                }, 2000);
+            }
+        }
+
+        // Функция для показа уведомления
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Рендеринг приложения
+        function render() {
+            const app = document.getElementById('app');
+            
+            if (currentView === 'main') {
+                renderMainMenu(app);
+            } else if (currentView === 'category') {
+                renderCategory(app, currentCategory);
+            } else if (currentView === 'model') {
+                renderModel(app, currentCategory, currentModel);
+            }
+        }
+
+        function renderMainMenu(app) {
+            const categoriesList = Object.entries(categories);
+            
+            let html = `
+                <div class="header">
+                    <h1>📁 Dreame Каталог</h1>
+                    <p>Нажмите на модель, чтобы получить PDF в чат</p>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value">${totalCategories}</div>
+                        <div class="stat-label">Категорий</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${totalModels}</div>
+                        <div class="stat-label">Моделей</div>
+                    </div>
+                </div>
+
+                <input type="text" class="search-box" placeholder="🔍 Поиск моделей..." 
+                       onkeyup="window.searchModels(this.value)" value="${searchQuery}">
+                
+                <div class="category-grid">
+            `;
+            
+            categoriesList.forEach(([catName, catData]) => {
+                const modelCount = catData.models.length;
+                html += `
+                    <div class="category-card" onclick="window.selectCategory('${catName.replace(/'/g, "\\'")}')">
+                        <h3>${catData.icon} ${catName}</h3>
+                        <p>
+                            <span>${modelCount} моделей</span>
+                            <span class="model-count">${modelCount}</span>
+                        </p>
+                    </div>
+                `;
+            });
+            
+            html += `</div>`;
+            
+            app.innerHTML = html;
+        }
+
+        function renderCategory(app, categoryName) {
+            const category = categories[categoryName];
+            if (!category) return;
+            
+            let html = `
+                <button class="back-button" onclick="window.goBack()">
+                    ← Назад к категориям
+                </button>
+                
+                <div class="header">
+                    <h1>${category.icon} ${categoryName}</h1>
+                    <p>${category.models.length} моделей • нажмите для получения PDF</p>
+                </div>
+
+                <input type="text" class="search-box" placeholder="🔍 Поиск в этой категории..." 
+                       onkeyup="window.filterModels(this.value)" id="categorySearch">
+                
+                <div class="models-list" id="modelsContainer">
+            `;
+            
+            category.models.forEach((modelName, index) => {
+                html += `
+                    <div class="model-item" onclick="window.selectModel('${categoryName.replace(/'/g, "\\'")}', ${index})">
+                        ${modelName}
+                        <span class="send-icon">📤</span>
+                    </div>
+                `;
+            });
+            
+            html += `
+                </div>
+                <div class="footer-nav">
+                    <button onclick="window.goBack()">◀️ Назад</button>
+                    <button onclick="window.goToMain()">🏠 Главная</button>
+                </div>
+            `;
+            
+            app.innerHTML = html;
+        }
+
+        function renderModel(app, categoryName, modelIndex) {
+            const category = categories[categoryName];
+            if (!category) return;
+            
+            const modelName = category.models[modelIndex];
+            
+            let html = `
+                <button class="back-button" onclick="window.goBack()">
+                    ← Назад к моделям
+                </button>
+                
+                <div class="model-detail">
+                    <h2>${modelName}</h2>
+                    <span class="category-badge">${category.icon} ${categoryName}</span>
+                    
+                    <button id="pdfRequestButton" class="get-pdf-button" 
+                            onclick="window.requestPDFFromBot('${category.folder}', '${modelName.replace(/'/g, "\\'")}', ${modelIndex})">
+                        📄 Получить PDF в чат
+                    </button>
+                    
+                    <div style="margin-top: 20px; color: var(--tg-theme-hint-color); font-size: 12px;">
+                        PDF будет отправлен прямо в этот чат
+                    </div>
+                </div>
+                
+                <div class="footer-nav">
+                    <button onclick="window.goBack()">◀️ Назад</button>
+                    <button onclick="window.goToMain()">🏠 Главная</button>
+                </div>
+            `;
+            
+            app.innerHTML = html;
+        }
+
+        // Поиск по моделям
+        function searchModels(query) {
+            searchQuery = query.toLowerCase();
+            
+            if (!searchQuery) {
+                render();
+                return;
+            }
+            
+            const results = [];
+            
+            Object.entries(categories).forEach(([catName, catData]) => {
+                catData.models.forEach((modelName, index) => {
+                    if (modelName.toLowerCase().includes(searchQuery)) {
+                        results.push({
+                            category: catName,
+                            categoryIcon: catData.icon,
+                            model: modelName,
+                            index: index,
+                            folder: catData.folder
+                        });
+                    }
+                });
+            });
+            
+            if (results.length > 0) {
+                showSearchResults(results);
+            }
+        }
+
+        function showSearchResults(results) {
+            const app = document.getElementById('app');
+            
+            let html = `
+                <button class="back-button" onclick="window.goToMain()">
+                    ← Назад
+                </button>
+                
+                <div class="header">
+                    <h1>🔍 Результаты поиска</h1>
+                    <p>Найдено: ${results.length}</p>
+                </div>
+                
+                <div class="models-list">
+            `;
+            
+            results.forEach(result => {
+                html += `
+                    <div class="model-item" onclick="window.selectModel('${result.category.replace(/'/g, "\\'")}', ${result.index})">
+                        ${result.categoryIcon} ${result.category} → ${result.model}
+                        <span class="send-icon">📤</span>
+                    </div>
+                `;
+            });
+            
+            html += `</div>`;
+            
+            app.innerHTML = html;
+        }
+
+        function filterModels(query) {
+            const searchTerm = query.toLowerCase();
+            const container = document.getElementById('modelsContainer');
+            if (!container) return;
+            
+            const models = container.getElementsByClassName('model-item');
+            
+            Array.from(models).forEach(model => {
+                const text = model.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    model.style.display = 'flex';
+                } else {
+                    model.style.display = 'none';
+                }
+            });
+        }
+
+        // Навигационные функции
+        function selectCategory(categoryName) {
+            currentView = 'category';
+            currentCategory = categoryName;
+            searchQuery = '';
+            render();
+            tg.HapticFeedback.impactOccurred('light');
+        }
+
+        function selectModel(categoryName, modelIndex) {
+            currentView = 'model';
+            currentCategory = categoryName;
+            currentModel = modelIndex;
+            render();
+            tg.HapticFeedback.impactOccurred('medium');
+        }
+
+        function goBack() {
+            if (currentView === 'model') {
+                currentView = 'category';
+            } else if (currentView === 'category') {
+                currentView = 'main';
+            }
+            searchQuery = '';
+            render();
+        }
+
+        function goToMain() {
+            currentView = 'main';
+            currentCategory = null;
+            currentModel = null;
+            searchQuery = '';
+            render();
+        }
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', () => {
+            render();
+            tg.ready();
+            
+            // Настраиваем основную кнопку
+            tg.MainButton.setText('Закрыть');
+            tg.MainButton.onClick(() => {
+                tg.close();
+            });
+        });
+
+        // Делаем функции глобальными
+        window.selectCategory = selectCategory;
+        window.selectModel = selectModel;
+        window.goBack = goBack;
+        window.goToMain = goToMain;
+        window.requestPDFFromBot = requestPDFFromBot;
+        window.searchModels = searchModels;
+        window.filterModels = filterModels;
+    </script>
+</body>
+</html>
