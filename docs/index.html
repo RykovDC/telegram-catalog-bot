@@ -31,6 +31,7 @@
             font-size: 24px;
             font-weight: 600;
             margin-bottom: 4px;
+            color: var(--tg-theme-text-color, #000000);
         }
 
         .header p {
@@ -87,6 +88,7 @@
             font-size: 16px;
             font-weight: 600;
             margin-bottom: 4px;
+            color: var(--tg-theme-text-color, #000000);
         }
 
         .category-card p {
@@ -108,6 +110,7 @@
 
         .back-button {
             background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            color: var(--tg-theme-text-color, #000000);
             border: none;
             border-radius: 10px;
             padding: 12px 16px;
@@ -121,7 +124,6 @@
             justify-content: center;
             gap: 6px;
             transition: opacity 0.2s;
-            color: var(--tg-theme-text-color, #000000);
         }
 
         .back-button:hover {
@@ -142,24 +144,12 @@
             transition: all 0.2s;
             border: 1px solid transparent;
             font-size: 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            color: var(--tg-theme-text-color, #000000);
         }
 
         .model-item:hover {
             border-color: var(--tg-theme-button-color, #40a7e3);
             transform: translateX(2px);
-        }
-
-        .model-item .send-icon {
-            opacity: 0.5;
-            font-size: 12px;
-        }
-
-        .model-item:hover .send-icon {
-            opacity: 1;
-            color: var(--tg-theme-button-color, #40a7e3);
         }
 
         .model-detail {
@@ -173,6 +163,7 @@
             font-size: 22px;
             font-weight: 600;
             margin-bottom: 8px;
+            color: var(--tg-theme-text-color, #000000);
         }
 
         .model-detail .category-badge {
@@ -185,7 +176,7 @@
             margin-bottom: 24px;
         }
 
-        .get-pdf-button {
+        .pdf-button {
             background-color: var(--tg-theme-button-color, #40a7e3);
             color: var(--tg-theme-button-text-color, #ffffff);
             border: none;
@@ -201,18 +192,15 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            text-decoration: none;
         }
 
-        .get-pdf-button:hover {
+        .pdf-button:hover {
             opacity: 0.9;
         }
 
-        .get-pdf-button:active {
+        .pdf-button:active {
             transform: scale(0.98);
-        }
-
-        .get-pdf-button.sent {
-            background-color: #4CAF50;
         }
 
         .search-box {
@@ -231,6 +219,12 @@
             color: var(--tg-theme-hint-color, #999999);
         }
 
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--tg-theme-hint-color, #666666);
+        }
+
         .footer-nav {
             margin-top: 20px;
             display: flex;
@@ -240,274 +234,160 @@
         .footer-nav button {
             flex: 1;
             background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            color: var(--tg-theme-text-color, #000000);
             border: none;
             border-radius: 8px;
             padding: 10px;
             font-size: 13px;
             cursor: pointer;
-            color: var(--tg-theme-text-color, #000000);
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: var(--tg-theme-hint-color, #666666);
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: var(--tg-theme-button-color, #40a7e3);
-            color: var(--tg-theme-button-text-color, #ffffff);
-            padding: 12px 24px;
-            border-radius: 30px;
-            font-size: 14px;
-            font-weight: 500;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            z-index: 1000;
-            transition: opacity 0.3s;
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .toast.show {
-            opacity: 1;
-        }
-
-        .debug-panel {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0,0,0,0.9);
-            color: #00ff00;
-            font-family: monospace;
-            font-size: 10px;
-            padding: 8px;
-            z-index: 10000;
-            max-height: 150px;
-            overflow-y: auto;
-            border-top: 2px solid #ffaa00;
-            display: none;
-        }
-        .debug-panel.visible {
-            display: block;
-        }
-        .debug-button {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            z-index: 10001;
-            background: #ffaa00;
-            border: none;
-            border-radius: 20px;
-            padding: 8px 12px;
-            font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            opacity: 0.7;
-        }
-        .debug-button:hover {
-            opacity: 1;
         }
     </style>
 </head>
 <body>
-    <!-- Панель отладки -->
-    <div id="debugPanel" class="debug-panel">
-        <div id="debugLog"></div>
-    </div>
-    <button class="debug-button" onclick="toggleDebug()">🐛 DEBUG</button>
-
-    <div id="toast" class="toast">Запрос отправлен! ✨</div>
     <div id="app">
         <div class="loading">Загрузка...</div>
     </div>
 
     <script>
-        // ================== ОТЛАДКА ==================
-        let debugMessages = [];
+        // Инициализация Telegram Web App
+        const tg = window.Telegram.WebApp;
         
-        function debugLog(message, data = null) {
-            const timestamp = new Date().toLocaleTimeString();
-            const logMsg = `[${timestamp}] ${message}` + (data ? ` ${JSON.stringify(data)}` : '');
-            console.log('🔍 DEBUG:', logMsg);
-            
-            debugMessages.unshift(logMsg);
-            if (debugMessages.length > 20) debugMessages.pop();
-            
-            const logDiv = document.getElementById('debugLog');
-            if (logDiv) {
-                logDiv.innerHTML = debugMessages.map(msg => `→ ${msg}`).join('<br>');
-            }
-        }
+        // Настраиваем внешний вид
+        tg.expand();
         
-        function toggleDebug() {
-            const panel = document.getElementById('debugPanel');
-            panel.classList.toggle('visible');
-            debugLog('Панель отладки ' + (panel.classList.contains('visible') ? 'открыта' : 'закрыта'));
-        }
-
-        // ================== ИНИЦИАЛИЗАЦИЯ ==================
-        debugLog('Скрипт загружен');
-        
-        // Проверяем Telegram WebApp
-        if (!window.Telegram || !window.Telegram.WebApp) {
-            debugLog('❌ Telegram WebApp не найден!');
-        } else {
-            debugLog('✅ Telegram WebApp найден');
-            debugLog('Версия:', window.Telegram.WebApp.version);
-            debugLog('Platform:', window.Telegram.WebApp.platform);
-        }
-
-        const tg = window.Telegram?.WebApp;
-        
-        if (tg) {
-            tg.expand();
-            debugLog('WebApp развернут');
-            
-            // Проверяем initData
-            debugLog('initData есть:', !!tg.initData);
-            if (tg.initData) {
-                debugLog('initData длина:', tg.initData.length);
-            }
-        }
-
-        // ================== ДАННЫЕ ==================
+        // Данные из вашего bot.py
         const categories = {
             "🤖 Роботы-пылесосы": {
-                folder: "robots",
+                short: "robots",
                 icon: "🤖",
-                models: [
-                    "F9 Pro",
-                    "Серия F10",
-                    "F20",
-                    "F21",
-                    "F21 Plus",
-                    "D9 Max",
-                    "D9 Max Gen 2",
-                    "D9 Plus",
-                    "D10 Plus",
-                    "D10 Plus Gen 2",
-                    "D10s",
-                    "D10s Pro & D10s Plus",
-                    "Серия D20",
-                    "D30 Ultra",
-                    "L10s Pro",
-                    "L10s Plus & L10s Pro Gen 2",
-                    "L10 Ultra & L10 Prime",
-                    "L10s Ultra",
-                    "L10s Pro Ultra",
-                    "L20 Ultra Complete",
-                    "L30 Ultra",
-                    "L40",
-                    "L40 Ultra CE & L40s Ultra",
-                    "L40 Ultra AE",
-                    "L40s Pro Ultra",
-                    "X40 Ultra Complete",
-                    "Серия X50",
-                    "Matrix10 Ultra",
-                    "Aqua10 Ultra Roller Complete"
-                ]
+                models: {
+                    "F9 Pro": "https://drive.google.com/file/d/13wR8298IxvStbAgVth3qDSNjZXAdJ1oo/view?usp=sharing",
+                    "Серия F10": "https://drive.google.com/file/d/1sy6nVkmlPsFiBfTqgA-aUIv2fFlWlMe-/view?usp=sharing",
+                    "F20": "https://drive.google.com/file/d/16iClR2rCSxol9e7Y0MaS_wZA-smvqguI/view?usp=drive_link",
+                    "F21": "https://drive.google.com/file/d/1r6rgzsu7JUPmkEL0G2O0ZJf1Nbfi_Z6L/view?usp=drive_link",
+                    "F21 Plus": "https://drive.google.com/file/d/1DzbMNFHMA6UMFvvuYZjMj3i6bcKzcF1_/view?usp=drive_link",
+                    "D9 Max": "https://drive.google.com/file/d/1wBjsxSqBmUPBjTmX746QBpt5-DuR_3RW/view?usp=sharing",
+                    "D9 Max Gen 2": "https://drive.google.com/file/d/1gTLwFyc3xi0ML-u2jeneAG4P-kfq8L21/view?usp=sharing",
+                    "D9 Plus": "https://drive.google.com/file/d/12qiVcKDveHIU_f8Tla4c2yM6AM0nOmrO/view?usp=sharing",
+                    "D10 Plus": "https://drive.google.com/file/d/1Rt4YEIy9arwYRJTLmqJxQg1poEGOY7dn/view?usp=sharing",
+                    "D10 Plus Gen 2": "https://drive.google.com/file/d/1votHcznDR7swe5zsFMudfFTLwAYxS3-h/view?usp=sharing",
+                    "D10s": "https://drive.google.com/file/d/116E7XKRvzPOzTL0_XbbhzxdpIl764X8m/view?usp=sharing",
+                    "D10s Pro & D10s Plus": "https://drive.google.com/file/d/1KqHR4iqWNS9xGUHQQwIC6c2yME03I1xK/view?usp=sharing",
+                    "Серия D20": "https://drive.google.com/file/d/1xoLmc19FdZ1KO6QwmSQOurjlq9m627Z1/view?usp=sharing",
+                    "D30 Ultra": "https://drive.google.com/file/d/1h09RyyVI3U_eSUv4rLhf8AYF1CHutqIB/view?usp=sharing",
+                    "L10s Pro": "https://drive.google.com/file/d/1lS4GvYu2N9grGjpkIuD7OdGN8ighc7mT/view?usp=sharing",
+                    "L10s Plus & L10s Pro Gen 2": "https://drive.google.com/file/d/14mVqy3pRrSCXRmk3FAm_FhX4BRS8pJQ6/view?usp=sharing",
+                    "L10 Ultra & L10 Prime": "https://drive.google.com/file/d/1oJsTXZWjRif2nkwlKd4lhlJfJd277-I1/view?usp=sharing",
+                    "L10s Ultra": "https://drive.google.com/file/d/1NYmzDMmTlKwu1zfpKjx4Hj3RCe-V5GTW/view?usp=sharing",
+                    "L10s Pro Ultra": "https://drive.google.com/file/d/1REboK4uDTxr-6OkQkkLEhLxhMf6vJiBs/view?usp=sharing",
+                    "L20 Ultra Complete": "https://drive.google.com/file/d/1zOy89Qk9_8Z7znmPZnsB-Mzu6tZCOC2h/view?usp=sharing",
+                    "L30 Ultra": "https://drive.google.com/file/d/1iE5qjzi_hG3B78gckgKnwHIUmnthCcwG/view?usp=sharing",
+                    "L40": "https://drive.google.com/file/d/1utwXSMpuqN8tayfsSVq4SBQdBPeslYLw/view?usp=sharing",
+                    "L40 Ultra CE & L40s Ultra": "https://drive.google.com/file/d/1Zl0vstqYpY352WXco99xM-IfLulrlYjE/view?usp=sharing",
+                    "L40 Ultra AE": "https://drive.google.com/file/d/1PjfGgxi3s-ORL6Hjp6EegOJFlwHZWntD/view?usp=sharing",
+                    "L40s Pro Ultra": "https://drive.google.com/file/d/1VDzSg2dt-QKLLrHt7Tyh21c-p9BqUvU0/view?usp=sharing",
+                    "X40 Ultra Complete": "https://drive.google.com/file/d/1ZnzT0SfkNYqOfIcUIry3hbHrKWaiOMLn/view?usp=sharing",
+                    "Серия X50": "https://drive.google.com/file/d/1DXNdbdL-S9hpqVzLh5nKhnWEBqQwMIiX/view?usp=sharing",
+                    "Matrix10 Ultra": "https://drive.google.com/file/d/1v9Mq4HcEMHPWjde8Hs5RmVf1tB1QysxG/view?usp=sharing",
+                    "Aqua10 Ultra Roller Complete": "https://drive.google.com/file/d/1MQH2gjmZbcNh3tPGRXx-AXJOW5D76BVh/view?usp=sharing"
+                }
             },
             "🔋 Вертикальные пылесосы": {
-                folder: "vertical",
+                short: "vertical",
                 icon: "🔋",
-                models: [
-                    "U10 & U20",
-                    "R10 & R10 Pro",
-                    "R10 Pro Aqua",
-                    "R10s Essential",
-                    "R10s & R10s Pro",
-                    "R10s Aqua",
-                    "R20 Essential",
-                    "R20",
-                    "R20 Aqua",
-                    "Z10 Station",
-                    "Z20 Essential",
-                    "Z20 & Z30",
-                    "Z20 AC & Z30 AC",
-                    "Z40 Station",
-                    "E10"
-                ]
+                models: {
+                    "U10 & U20": "https://drive.google.com/file/d/1FU47npYBwANB3We5TxodDRxMCi_PfB-2/view?usp=sharing",
+                    "R10 & R10 Pro": "https://drive.google.com/file/d/1Y0Cc2PHNcDv-qzA1dZmWE5f1h6c65Ibh/view?usp=sharing",
+                    "R10 Pro Aqua": "https://drive.google.com/file/d/1sMrU6wg8wewy8UmFWWQum0N3ujl9WqlZ/view?usp=sharing",
+                    "R10s Essential": "https://drive.google.com/file/d/18iNmkZYaFkAgtIOXo17omRGLNPZa87y9/view?usp=sharing",
+                    "R10s & R10s Pro": "https://drive.google.com/file/d/1X7T3BmiTP_L8LfcADoT7l7dYy7fV-xzz/view?usp=sharing",
+                    "R10s Aqua": "https://drive.google.com/file/d/189t5xtKhEQVGC-BFOp6rUokouZAtucf7/view?usp=sharing",
+                    "R20 Essential": "https://drive.google.com/file/d/1bE5C5noY_0QeT_u2z2xbcQ-ytXhyICHH/view?usp=sharing",
+                    "R20": "https://drive.google.com/file/d/1vcD0W8v8ZcW6eyuETZn0xPFtTRI5f_IP/view?usp=sharing",
+                    "R20 Aqua": "https://drive.google.com/file/d/17Bb3ntnLFX5DjV2Lx7VHMcy_Q-SuXuoT/view?usp=sharing",
+                    "Z10 Station": "https://drive.google.com/file/d/1a3kfIBwz48PaXAHocRsrG9qc32_rTtt9/view?usp=sharing",
+                    "Z20 Essential": "https://drive.google.com/file/d/1p4qVkD_OBQ4sKQxsO5P9z26JfXwBFDVx/view?usp=sharing",
+                    "Z20 & Z30": "https://drive.google.com/file/d/1FfiAdLziAA-U2_KxwYzLzZFEU_9Zhohu/view?usp=sharing",
+                    "Z20 AC & Z30 AC": "https://drive.google.com/file/d/1eJWOgOH-CpglP1JQNiBZ_j0ne7UEW8Ad/view?usp=sharing",
+                    "Z40 Station": "https://drive.google.com/file/d/1DIrcAoRze1hTcL2GBXu1g3QcGMSZJNJo/view?usp=sharing",
+                    "E10": "https://drive.google.com/file/d/1Q351DBeXaZUuX1tgGwzVsMrdWvraiwPN/view?usp=sharing"
+                }
             },
             "💦 Моющие пылесосы": {
-                folder: "wash",
+                short: "wash",
                 icon: "💦",
-                models: [
-                    "G10 & G10 Combo",
-                    "G10 Pro",
-                    "H11 Core",
-                    "H12 & H12 Core",
-                    "H12S",
-                    "H12S AE",
-                    "H12 Pro & H12 Dual",
-                    "H12 FlexReach",
-                    "H12 Pro FlexReach",
-                    "H12 Dual FlexReach",
-                    "H13 Pro",
-                    "H14 Dual",
-                    "H15 Pro Heat"
-                ]
+                models: {
+                    "G10 & G10 Combo": "https://drive.google.com/file/d/1MqAig9fKesw0TUZggfHuC2QUAXaZZsP3/view?usp=sharing",
+                    "G10 Pro": "https://drive.google.com/file/d/1S_VUpB5JlF6UG9YYVC3GvNC6Y6EXQ0IV/view?usp=sharing",
+                    "H11 Core": "https://drive.google.com/file/d/1dG_6bVJmmPRS-za51t4NbvAkcLTREhAB/view?usp=sharing",
+                    "H12 & H12 Core": "https://drive.google.com/file/d/109pLAe7zgOG3kWduEiNy5xZy8hx8XikA/view?usp=sharing",
+                    "H12S": "https://drive.google.com/file/d/1Is7XTMDEa-_1IJ_KAAE7aPs8VHP65aWe/view?usp=sharing",
+                    "H12S AE": "https://drive.google.com/file/d/1pp9Ry8HnYlT7AsiQQIN7X6vR0Hon78a-/view?usp=sharing",
+                    "H12 Pro & H12 Dual": "https://drive.google.com/file/d/17_s6yJfy4HVJGMPcvGURMGYJC0Q5wANv/view?usp=sharing",
+                    "H12 FlexReach": "https://drive.google.com/file/d/1COScv0C26KiiMbzjh4OoXwzNV5IcxTkH/view?usp=sharing",
+                    "H12 Pro FlexReach": "https://drive.google.com/file/d/1mSDOTl4St2lSI5X9tZ6jVzUvWSfrnu0P/view?usp=sharing",
+                    "H12 Dual FlexReach": "https://drive.google.com/file/d/1aYwXkr5JY8h1JpJS7db3xHs8a-KEa4yY/view?usp=sharing",
+                    "H13 Pro": "https://drive.google.com/file/d/1aYwXkr5JY8h1JpJS7db3xHs8a-KEa4yY/view?usp=sharing",
+                    "H14 Dual": "https://drive.google.com/file/d/1PBogCf1CE05zMixTaZpicE45r5PlPLwu/view?usp=sharing",
+                    "H15 Pro Heat": "https://drive.google.com/file/d/1r5HFJVRUDPQj9lL0ENld-vY3vZ5P5RO5/view?usp=sharing"
+                }
             },
             "🌿 Роботы-газонокосилки": {
-                folder: "mowers",
+                short: "mowers",
                 icon: "🌿",
-                models: [
-                    "A1 Pro"
-                ]
+                models: {
+                    "A1 Pro": "https://drive.google.com/file/d/1lWlK8bxwg55hk-cxuC4ufZ5fJvgoGR_Q/view?usp=sharing"
+                }
             },
             "✨ Техника для ухода": {
-                folder: "care",
+                short: "care",
                 icon: "✨",
-                models: [
-                    "Mini",
-                    "Gleam",
-                    "Glory",
-                    "Glory Mix",
-                    "Glory Master",
-                    "Pocket",
-                    "Pocket Ultra",
-                    "Gusto",
-                    "Miracle",
-                    "Miracle Pro",
-                    "Pilot",
-                    "Dazzle",
-                    "AirStyle",
-                    "AirStyle Pro",
-                    "AirStyle Pro Hi",
-                    "Aero Straight",
-                    "Hair Removal",
-                    "S7"
-                ]
+                models: {
+                    "Mini": "https://drive.google.com/file/d/1h8gF6RRdx9sByoTDmHjouPbUGTnXw2NB/view?usp=sharing",
+                    "Gleam": "https://drive.google.com/file/d/1Gt5DPdOap7oSWOpD8zQfn0Y4-0oZ5HSD/view?usp=sharing",
+                    "Glory": "https://drive.google.com/file/d/1aTPvu7VKsgt056MsJkO8qg7TpE8-CJ1X/view?usp=sharing",
+                    "Glory Mix": "https://drive.google.com/file/d/1AwPVFenkaG-NVl0zufGUEzSQYrXHkS2u/view?usp=sharing",
+                    "Glory Master": "https://drive.google.com/file/d/11P2i1089RdeSVWutM_zUGCVa9w_Pxdsc/view?usp=sharing",
+                    "Pocket": "https://drive.google.com/file/d/14SPXV7CNyiRXIBkC0LTz0SnQt5aAdgZP/view?usp=sharing",
+                    "Pocket Ultra": "https://drive.google.com/file/d/11JNsWC8u_rrOLt5YwcgIlASxpa2giqBF/view?usp=sharing",
+                    "Gusto": "https://drive.google.com/file/d/1p1SKo0Ue9WtQbOUyEJYD2-bvkKhbYyJa/view?usp=sharing",
+                    "Miracle": "https://drive.google.com/file/d/16RBqYGBc46qt_VegWHqZ6i_qxgk2WeLH/view?usp=sharing",
+                    "Miracle Pro": "https://drive.google.com/file/d/1OyInKC4XWuTpGPH896JlQJ93SQJTHT-N/view?usp=sharing",
+                    "Pilot": "https://drive.google.com/file/d/1ASrlxeR_RpPx33-hDT3zeqIacaQnJJjg/view?usp=sharing",
+                    "Dazzle": "https://drive.google.com/file/d/1EUipnwwGm8qzGKZUiCPV4d_yY8T4xeQe/view?usp=sharing",
+                    "AirStyle": "https://drive.google.com/file/d/1ODzX8nIFE25Vn1xe4k0dHfv09NUa1keF/view?usp=sharing",
+                    "AirStyle Pro": "https://drive.google.com/file/d/1ZG4Q_JSJmf56B-vSwFWQDVIEqeonccxx/view?usp=sharing",
+                    "AirStyle Pro Hi": "https://disk.yandex.ru/i/olq0VW3gPYt89Q",
+                    "Aero Straight": "https://drive.google.com/file/d/1mSQL-aGY3pWKg7OgU5QO3xEusLuPA1ge/view?usp=sharing",
+                    "Hair Removal": "https://drive.google.com/file/d/18lpPBEhpzPuuQT9TcDov9T3lZ9Kzn8wJ/view?usp=sharing",
+                    "S7": "https://drive.google.com/file/d/1yxitvnxo3cqcxgaMWGhFBviQnhtTUNcA/view?usp=sharing"
+                }
             },
             "🌡️ Климат": {
-                folder: "climate",
+                short: "climate",
                 icon: "🌡️",
-                models: [
-                    "PM10 & PM20",
-                    "PM30",
-                    "H40 & H40 Essential",
-                    "AP10",
-                    "HT30 Ultra"
-                ]
+                models: {
+                    "PM10 & PM20": "https://drive.google.com/file/d/1oyKd_w74F_xDrZ35nR0RaztHmznvN8qu/view?usp=sharing",
+                    "PM30": "https://drive.google.com/file/d/1j9ffL1VKCPUZVvk1SFUWQuLo9bvG6-I8/view?usp=sharing",
+                    "H40 & H40 Essential": "https://drive.google.com/file/d/1NGEZFnKBrh7TfPnwh5NgK67oIpxkhvp9/view?usp=sharing",
+                    "AP10": "https://drive.google.com/file/d/1EF1IeQ4D7JxSs0RgZlCb1pPEKZvHQLPX/view?usp=sharing",
+                    "HT30 Ultra": "https://drive.google.com/file/d/1MqBIguhks73Nms-7ugvl3NFFzigZGWmW/view?usp=sharing"
+                }
             },
             "🍗 Аэрогрили": {
-                folder: "airfry",
+                short: "airfry",
                 icon: "🍗",
-                models: [
-                    "AF30"
-                ]
+                models: {
+                    "AF30": "https://drive.google.com/file/d/1m5vy8vibl9xKRUel40szD-qTf9EPkYIm/view?usp=sharing"
+                }
             },
             "🏠 Для дома": {
-                folder: "home",
+                short: "home",
                 icon: "🏠",
-                models: [
-                    "S10",
-                    "DF10 & DF10 Pro"
-                ]
+                models: {
+                    "S10": "https://drive.google.com/file/d/19LdvfW8IVe1T6trhgimYk764z1V2-uZp/view?usp=sharing",
+                    "DF10 & DF10 Pro": "https://drive.google.com/file/d/1RWR_zJW1Jhm7hpFnw1aWgAHGUwc__Qc0/view?usp=sharing"
+                }
             }
         };
 
@@ -519,73 +399,18 @@
 
         // Подсчет статистики
         const totalCategories = Object.keys(categories).length;
-        const totalModels = Object.values(categories).reduce((acc, cat) => acc + cat.models.length, 0);
+        const totalModels = Object.values(categories).reduce((acc, cat) => acc + Object.keys(cat.models).length, 0);
 
-        // ================== ОТПРАВКА ДАННЫХ ==================
-        function requestPDFFromBot(folderName, modelName, modelIndex) {
-            debugLog('📤 НАЧАЛО ОТПРАВКИ', {folderName, modelName, modelIndex});
-            
-            // Показываем уведомление
-            showToast('⏳ Отправляю запрос...');
-            
-            // Проверяем tg
-            if (!tg) {
-                debugLog('❌ tg не существует!');
-                showToast('❌ Ошибка: WebApp не инициализирован');
-                return;
+        // Функция для открытия ссылок
+        function openPdf(url) {
+            if (url) {
+                window.open(url, '_blank');
+            } else {
+                alert('Ссылка на PDF не найдена');
             }
-            
-            // Формируем данные
-            const data = {
-                action: 'get_pdf',
-                folder: folderName,
-                model: modelName,
-                index: modelIndex,
-                timestamp: Date.now()
-            };
-            
-            const jsonData = JSON.stringify(data);
-            debugLog('📦 Данные подготовлены:', data);
-            debugLog('📦 JSON длина:', jsonData.length);
-            
-            try {
-                // ПРОБУЕМ ОТПРАВИТЬ
-                debugLog('📤 Вызываю tg.sendData()...');
-                tg.sendData(jsonData);
-                debugLog('✅ tg.sendData() выполнен без ошибок');
-                
-                // Меняем текст кнопки
-                const button = document.getElementById('pdfRequestButton');
-                if (button) {
-                    button.textContent = '✅ Запрос отправлен!';
-                    button.classList.add('sent');
-                    setTimeout(() => {
-                        button.textContent = '📄 Получить PDF в чат';
-                        button.classList.remove('sent');
-                    }, 2000);
-                }
-                
-                showToast('✨ Запрос отправлен! Проверьте чат');
-                
-            } catch (error) {
-                debugLog('❌ ОШИБКА ПРИ ОТПРАВКЕ:', error.toString());
-                showToast('❌ Ошибка: ' + error.message);
-            }
-            
-            debugLog('📤 ОТПРАВКА ЗАВЕРШЕНА');
         }
 
-        // ================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==================
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 2000);
-        }
-
-        // ================== РЕНДЕРИНГ ==================
+        // Рендеринг приложения
         function render() {
             const app = document.getElementById('app');
             
@@ -604,7 +429,7 @@
             let html = `
                 <div class="header">
                     <h1>📁 Dreame Каталог</h1>
-                    <p>Нажмите на модель, чтобы получить PDF в чат</p>
+                    <p>Техника для умного дома</p>
                 </div>
                 
                 <div class="stats">
@@ -619,15 +444,15 @@
                 </div>
 
                 <input type="text" class="search-box" placeholder="🔍 Поиск моделей..." 
-                       onkeyup="window.searchModels(this.value)" value="${searchQuery}">
+                       onkeyup="searchModels(this.value)" value="${searchQuery}">
                 
                 <div class="category-grid">
             `;
             
             categoriesList.forEach(([catName, catData]) => {
-                const modelCount = catData.models.length;
+                const modelCount = Object.keys(catData.models).length;
                 html += `
-                    <div class="category-card" onclick="window.selectCategory('${catName.replace(/'/g, "\\'")}')">
+                    <div class="category-card" onclick="selectCategory('${catName.replace(/'/g, "\\'")}')">
                         <h3>${catData.icon} ${catName}</h3>
                         <p>
                             <span>${modelCount} моделей</span>
@@ -646,27 +471,28 @@
             const category = categories[categoryName];
             if (!category) return;
             
+            const modelsList = Object.entries(category.models);
+            
             let html = `
-                <button class="back-button" onclick="window.goBack()">
+                <button class="back-button" onclick="goBack()">
                     ← Назад к категориям
                 </button>
                 
                 <div class="header">
                     <h1>${category.icon} ${categoryName}</h1>
-                    <p>${category.models.length} моделей • нажмите для получения PDF</p>
+                    <p>${modelsList.length} моделей</p>
                 </div>
 
                 <input type="text" class="search-box" placeholder="🔍 Поиск в этой категории..." 
-                       onkeyup="window.filterModels(this.value)" id="categorySearch">
+                       onkeyup="filterModels(this.value)" id="categorySearch">
                 
                 <div class="models-list" id="modelsContainer">
             `;
             
-            category.models.forEach((modelName, index) => {
+            modelsList.forEach(([modelName, modelUrl]) => {
                 html += `
-                    <div class="model-item" onclick="window.selectModel('${categoryName.replace(/'/g, "\\'")}', ${index})">
+                    <div class="model-item" onclick="selectModel('${categoryName.replace(/'/g, "\\'")}', '${modelName.replace(/'/g, "\\'")}')">
                         ${modelName}
-                        <span class="send-icon">📤</span>
                     </div>
                 `;
             });
@@ -674,22 +500,22 @@
             html += `
                 </div>
                 <div class="footer-nav">
-                    <button onclick="window.goBack()">◀️ Назад</button>
-                    <button onclick="window.goToMain()">🏠 Главная</button>
+                    <button onclick="goBack()">◀️ Назад</button>
+                    <button onclick="goToMain()">🏠 Главная</button>
                 </div>
             `;
             
             app.innerHTML = html;
         }
 
-        function renderModel(app, categoryName, modelIndex) {
+        function renderModel(app, categoryName, modelName) {
             const category = categories[categoryName];
             if (!category) return;
             
-            const modelName = category.models[modelIndex];
+            const modelUrl = category.models[modelName];
             
             let html = `
-                <button class="back-button" onclick="window.goBack()">
+                <button class="back-button" onclick="goBack()">
                     ← Назад к моделям
                 </button>
                 
@@ -697,19 +523,18 @@
                     <h2>${modelName}</h2>
                     <span class="category-badge">${category.icon} ${categoryName}</span>
                     
-                    <button id="pdfRequestButton" class="get-pdf-button" 
-                            onclick="window.requestPDFFromBot('${category.folder}', '${modelName.replace(/'/g, "\\'")}', ${modelIndex})">
-                        📄 Получить PDF в чат
+                    <button class="pdf-button" onclick="openPdf('${modelUrl}')">
+                        📄 Открыть PDF инструкцию
                     </button>
                     
                     <div style="margin-top: 20px; color: var(--tg-theme-hint-color); font-size: 12px;">
-                        PDF будет отправлен в этот чат с ботом
+                        Нажмите кнопку выше, чтобы открыть PDF
                     </div>
                 </div>
                 
                 <div class="footer-nav">
-                    <button onclick="window.goBack()">◀️ Назад</button>
-                    <button onclick="window.goToMain()">🏠 Главная</button>
+                    <button onclick="goBack()">◀️ Назад</button>
+                    <button onclick="goToMain()">🏠 Главная</button>
                 </div>
             `;
             
@@ -728,14 +553,12 @@
             const results = [];
             
             Object.entries(categories).forEach(([catName, catData]) => {
-                catData.models.forEach((modelName, index) => {
+                Object.keys(catData.models).forEach(modelName => {
                     if (modelName.toLowerCase().includes(searchQuery)) {
                         results.push({
                             category: catName,
                             categoryIcon: catData.icon,
-                            model: modelName,
-                            index: index,
-                            folder: catData.folder
+                            model: modelName
                         });
                     }
                 });
@@ -750,7 +573,7 @@
             const app = document.getElementById('app');
             
             let html = `
-                <button class="back-button" onclick="window.goToMain()">
+                <button class="back-button" onclick="goToMain()">
                     ← Назад
                 </button>
                 
@@ -764,9 +587,8 @@
             
             results.forEach(result => {
                 html += `
-                    <div class="model-item" onclick="window.selectModel('${result.category.replace(/'/g, "\\'")}', ${result.index})">
+                    <div class="model-item" onclick="selectModel('${result.category.replace(/'/g, "\\'")}', '${result.model.replace(/'/g, "\\'")}')">
                         ${result.categoryIcon} ${result.category} → ${result.model}
-                        <span class="send-icon">📤</span>
                     </div>
                 `;
             });
@@ -786,7 +608,7 @@
             Array.from(models).forEach(model => {
                 const text = model.textContent.toLowerCase();
                 if (text.includes(searchTerm)) {
-                    model.style.display = 'flex';
+                    model.style.display = 'block';
                 } else {
                     model.style.display = 'none';
                 }
@@ -799,15 +621,13 @@
             currentCategory = categoryName;
             searchQuery = '';
             render();
-            try { tg.HapticFeedback.impactOccurred('light'); } catch(e) {}
         }
 
-        function selectModel(categoryName, modelIndex) {
+        function selectModel(categoryName, modelName) {
             currentView = 'model';
             currentCategory = categoryName;
-            currentModel = modelIndex;
+            currentModel = modelName;
             render();
-            try { tg.HapticFeedback.impactOccurred('medium'); } catch(e) {}
         }
 
         function goBack() {
@@ -830,22 +650,8 @@
 
         // Инициализация
         document.addEventListener('DOMContentLoaded', () => {
-            debugLog('DOM загружен');
             render();
-            
-            if (tg) {
-                tg.ready();
-                debugLog('tg.ready() вызван');
-            }
-            
-            // Настраиваем основную кнопку
-            if (tg) {
-                tg.MainButton.setText('Закрыть');
-                tg.MainButton.onClick(() => {
-                    tg.close();
-                });
-                debugLog('MainButton настроен');
-            }
+            tg.ready();
         });
 
         // Делаем функции глобальными
@@ -853,11 +659,9 @@
         window.selectModel = selectModel;
         window.goBack = goBack;
         window.goToMain = goToMain;
-        window.requestPDFFromBot = requestPDFFromBot;
+        window.openPdf = openPdf;
         window.searchModels = searchModels;
         window.filterModels = filterModels;
-        window.toggleDebug = toggleDebug;
-        window.debugLog = debugLog;
     </script>
 </body>
 </html>
