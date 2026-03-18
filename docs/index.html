@@ -185,13 +185,6 @@
             margin-bottom: 24px;
         }
 
-        .button-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin: 20px 0;
-        }
-
         .pdf-button {
             background-color: var(--tg-theme-button-color, #40a7e3);
             color: var(--tg-theme-button-text-color, #ffffff);
@@ -202,6 +195,7 @@
             font-weight: 600;
             cursor: pointer;
             width: 100%;
+            margin: 20px 0;
             transition: opacity 0.2s;
             display: flex;
             align-items: center;
@@ -215,10 +209,6 @@
 
         .pdf-button:active {
             transform: scale(0.98);
-        }
-
-        .pdf-button.download {
-            background-color: #4CAF50;
         }
 
         .search-box {
@@ -293,30 +283,6 @@
         // Инициализация Telegram Web App
         const tg = window.Telegram.WebApp;
         tg.expand();
-
-        // Функция для преобразования ссылки на просмотр в ссылку на скачивание
-        function getDownloadUrl(url) {
-            // Для Яндекс.Диска
-            if (url.includes('disk.yandex.ru')) {
-                // Извлекаем публичный ключ
-                const match = url.match(/\/i\/([^\/?]+)/);
-                if (match && match[1]) {
-                    return `https://downloader.disk.yandex.ru/disk/${match[1]}`;
-                }
-            }
-            
-            // Для Google Drive
-            if (url.includes('drive.google.com')) {
-                // Извлекаем ID файла
-                const match = url.match(/\/d\/([^\/?]+)/);
-                if (match && match[1]) {
-                    return `https://drive.google.com/uc?export=download&id=${match[1]}`;
-                }
-            }
-            
-            // Если не удалось преобразовать, возвращаем исходную ссылку
-            return url;
-        }
 
         // Данные из вашего bot.py со всеми ссылками
         const categories = {
@@ -476,13 +442,6 @@
             window.open(url, '_blank');
         }
 
-        // Функция скачивания PDF
-        function downloadPdf(url) {
-            showToast('⬇️ Скачиваю PDF...');
-            const downloadUrl = getDownloadUrl(url);
-            window.open(downloadUrl, '_blank');
-        }
-
         function showToast(message) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -605,14 +564,12 @@
                     <h2>${modelName}</h2>
                     <span class="category-badge">${category.icon} ${categoryName}</span>
                     
-                    <div class="button-container">
-                        <button class="pdf-button" onclick="window.openPdf('${modelUrl}')">
-                            📄 Открыть PDF
-                        </button>
-                        
-                        <button class="pdf-button download" onclick="window.downloadPdf('${modelUrl}')">
-                            ⬇️ Скачать PDF
-                        </button>
+                    <button class="pdf-button" onclick="window.openPdf('${modelUrl}')">
+                        📄 Открыть PDF
+                    </button>
+                    
+                    <div style="margin-top: 20px; color: var(--tg-theme-hint-color); font-size: 12px;">
+                        Нажмите кнопку выше для открытия PDF
                     </div>
                 </div>
                 
@@ -744,7 +701,6 @@
         window.goBack = goBack;
         window.goToMain = goToMain;
         window.openPdf = openPdf;
-        window.downloadPdf = downloadPdf;
         window.searchModels = searchModels;
         window.filterModels = filterModels;
     </script>
